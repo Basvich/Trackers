@@ -20,6 +20,7 @@ export class AppComponent {
   /** Vector de traslado de corrdenandas de viewPort*/ 
   private translateV: p5.Vector;
   title = 'trackers';
+  CheckboxVar=true;
   ngOnInit(): void {
     this.setupP5();
     this.setupTrackers();
@@ -84,6 +85,7 @@ export class AppComponent {
 
   public onAngleChanged(event: MatSliderChange): void{
     const g=event.value*Math.PI/180;
+    this.getTrackers();
     this.trackers.forEach(tracker => {
       tracker.rot=g;
     });
@@ -120,5 +122,10 @@ export class AppComponent {
       }
       this.trackers.push(nTrack);
     }
+  }
+
+  protected getTrackers():VTracker[] {
+    if(this.CheckboxVar) return this.trackers;
+    return [this.trackers[0]];
   }
 }
