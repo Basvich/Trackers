@@ -7,7 +7,8 @@
     <mat-grid-tile  [style.background]="'lightgreen'">2</mat-grid-tile>
     <mat-grid-tile [style.background]="'lightpink'">3</mat-grid-tile>
     <mat-grid-tile [style.background]="'lightblue'">
-      <mat-slider min="1" max="100" step="1" value="1"></mat-slider>
+      <mat-slider thumbLabel tickInterval="30" min="-90" max="90" step="5" value="0" (input)="onAngleChanged($event)"></mat-slider>
+      <mat-slider thumbLabel tickInterval="10" min="0" max="100" step="5" value="100" (input)="onBatteryChanged($event)">Battery</mat-slider>
       <button mat-button (click)="invalidateDrawn()" >Draw</button>
       <button mat-button color="primary">Primary</button>
     </mat-grid-tile>

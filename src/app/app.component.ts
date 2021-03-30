@@ -1,4 +1,5 @@
 import {Component} from '@angular/core';
+import {MatSliderChange} from '@angular/material/slider';
 import * as p5 from 'p5';
 import {VTracker} from './visual-tracker/VTracker';
 
@@ -66,6 +67,22 @@ export class AppComponent {
     setTimeout(() => this.canvasP5.redraw(), 0);
   }
 
+  public onAngleChanged(event: MatSliderChange): void{
+    const g=event.value*Math.PI/180;
+    this.trackers.forEach(tracker => {
+      tracker.rot=g;
+    });
+    this.invalidateDrawn();
+  }
+
+  public onBatteryChanged(event: MatSliderChange): void{
+    const g=event.value;
+    this.trackers.forEach(tracker => {
+      tracker.battery=g;
+    });
+    this.invalidateDrawn();
+  }
+
   protected draw(): void {
     this.canvasP5.background(250);
     this.canvasP5.scale(this.zoom);
@@ -76,15 +93,15 @@ export class AppComponent {
   }
 
   protected setupTrackers(): void {
-    const f = 100;
+    const f = 5000;
     let y = 20;
     let x = 20;
     for (let i = 0; i < f; i++) {
       const nTrack = new VTracker(x, y);
       x += 40;
-      if (x > 400) {
+      if (x > 1200) {
         x = 20;
-        y += 40;
+        y += 80;
       }
       this.trackers.push(nTrack);
     }
