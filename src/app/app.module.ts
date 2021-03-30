@@ -1,22 +1,34 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
+import { FormsModule } from '@angular/forms'; 
 import { AppComponent } from './app.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatButtonModule} from '@angular/material/button';
 import {MatGridListModule} from '@angular/material/grid-list';
+import {MatListModule} from '@angular/material/list';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+
 
 @NgModule({
   declarations: [
     AppComponent
   ],
-  imports: [
+  imports: [    
+    FormsModule,
     BrowserModule,
     BrowserAnimationsModule,
+    FlexLayoutModule,
     MatSliderModule,
     MatButtonModule,
-    MatGridListModule
+    MatGridListModule,
+    MatListModule,
+    MatSlideToggleModule,
+    MatFormFieldModule ,
+    MatInputModule    
   ],
   providers: [],
   bootstrap: [AppComponent]

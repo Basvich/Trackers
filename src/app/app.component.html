@@ -1,22 +1,36 @@
-
-<div class="content" role="main">
-  <mat-grid-list cols="3" rowHeight="1:1">
-    <mat-grid-tile   [style.background]="'skyblue'" [colspan]="3" [rowspan]="3">
-      <div id="containerP5"></div>
-    </mat-grid-tile>
-    <mat-grid-tile  [style.background]="'lightgreen'">2</mat-grid-tile>
-    <mat-grid-tile [style.background]="'lightpink'">3</mat-grid-tile>
-    <mat-grid-tile [style.background]="'lightblue'">
-      <mat-slider thumbLabel tickInterval="30" min="-90" max="90" step="5" value="0" (input)="onAngleChanged($event)"></mat-slider>
-      <mat-slider thumbLabel tickInterval="10" min="0" max="100" step="5" value="100" (input)="onBatteryChanged($event)">Battery</mat-slider>
-      <button mat-button (click)="invalidateDrawn()" >Draw</button>
-      <button mat-button color="primary">Primary</button>
-    </mat-grid-tile>
-  </mat-grid-list> 
-  <!-- Footer -->
-  <footer>
-  </footer>
-
+<div fxLayout="row">
+  <div style="background-color:lightgreen">aaa</div>
+  <div style="background-color:lightblue">bbb</div>
+</div>
+<div flex fxLayout="column">
+  <div fxflex>header</div>
+  <div fxFlex>
+    <div id="containerP5"></div>
+  </div>
+  <div  id="controles" fxLayout="row"  style="background-color:lemonchiffon">
+    <div fxFlex="20" style="background-color:lightgreen">
+          <mat-slide-toggle [(ngModel)]="CheckboxVar">Todos</mat-slide-toggle>  
+          <mat-form-field appearance="fill">    
+            <mat-label>Select</mat-label>
+            <input matInput placeholder="Ex. Pizza" type="number" id="myNumber" [disabled]="!CheckboxVar"/>         
+          </mat-form-field>    
+    </div>
+    <div  fxFlex="80" style="background-color:lightblue" wi>
+      <mat-list>
+        <mat-list-item>        
+          <mat-label>angulo:</mat-label> <mat-slider   thumbLabel tickInterval="30" min="-90"  max="90" step="5" value="0"  (input)="onAngleChanged($event)"></mat-slider>        
+        </mat-list-item>
+        <mat-list-item>
+          <mat-label>bateria:</mat-label><mat-slider   thumbLabel tickInterval="10" min="0" max="100" step="5" value="100" (input)="onBatteryChanged($event)">Battery</mat-slider >
+        </mat-list-item>         
+      </mat-list>  
+    </div>    
+  </div> 
+  <div style="background-color:lightsalmon">
+    <button mat-button (click)="invalidateDrawn()">Draw</button>
+    <button mat-button color="primary">Primary</button>
+  </div>
 </div>
 
+<div fxflex>footer</div>
 
