@@ -11,6 +11,7 @@ import { MatButtonModule} from '@angular/material/button';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatListModule} from '@angular/material/list';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 
 @NgModule({
@@ -28,7 +29,8 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
     MatListModule,
     MatSlideToggleModule,
     MatFormFieldModule ,
-    MatInputModule    
+    MatInputModule,
+    MatTooltipModule    
   ],
   providers: [],
   bootstrap: [AppComponent]
