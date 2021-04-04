@@ -27,7 +27,7 @@ export class AppComponent {
   private hightBound = [800, 400];
   title = 'trackers';
   selectedAllTrackers = true;
-  selectedIdTracker = 5;
+  selectedIdTracker = 15;
   alarms: IAlarms = {
     noCom: false,
     safePosition: false,
@@ -129,10 +129,13 @@ export class AppComponent {
     const t0 = performance.now();
     this.canvasP5.background(250);
     this.canvasP5.scale(this.zoom);
+    const opt={
+      labels:this.zoom>=1
+    };
     this.canvasP5.translate(this.translateV);
     this.trackers.forEach(element => {
       if (this.inBounds(element.x, element.y)) {
-        element.drawn(this.canvasP5);
+        element.drawn(this.canvasP5, opt);
       }
     });
     const t1 = performance.now();

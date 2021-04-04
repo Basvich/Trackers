@@ -32,6 +32,10 @@ export interface IAlarms {
   motor: boolean;
 }
 
+export interface IoptVTreacker{
+  labels: boolean;
+}
+
 export class VTracker {
 
   private panDy = 0;
@@ -86,7 +90,9 @@ export class VTracker {
 
   }
 
-  public drawn(canvasP5: p5): void {
+  public drawn(canvasP5: p5, opt?: IoptVTreacker): void {
+    canvasP5.textSize(4);
+    canvasP5.textAlign(canvasP5.CENTER, canvasP5.CENTER);
     canvasP5.noFill();
     //El panel vista superior
     if(this.drawPanel){
@@ -105,8 +111,8 @@ export class VTracker {
     canvasP5.strokeWeight(1);
     // La batería
     canvasP5.noFill();
-    canvasP5.stroke(this.batColor);
-    let py = this.y + CTracker.battery.posY;
+    canvasP5.stroke(this.batColor);    
+    let py = this.y + CTracker.battery.posY;       
     canvasP5.rect(this.x - CTracker.baseSemiWidth, py, CTracker.battery.width, CTracker.battery.height);
     canvasP5.rect(this.x - CTracker.baseSemiWidth + CTracker.battery.width, py + CTracker.battery.poleY, 1, CTracker.battery.poleHeight);
     // La carga
@@ -117,17 +123,27 @@ export class VTracker {
     // Zona de alarmas
     canvasP5.stroke(colorLines);
     py+= CTracker.battery.height+2;
+    
     canvasP5.fill(this.alarmNoComColor);
     canvasP5.rect(this.x - CTracker.baseSemiWidth, py, CTracker.alarms.width, CTracker.alarms.height,2);
+    if(opt?.labels) canvasP5.text("comm", this.x, py+CTracker.alarms.height/2);
     py+=CTracker.alarms.height+2;
     canvasP5.fill(this.alarmSafePositionColor);
     canvasP5.rect(this.x - CTracker.baseSemiWidth, py, CTracker.alarms.width, CTracker.alarms.height,2);
+    if(opt?.labels) canvasP5.text("safe", this.x, py+CTracker.alarms.height/2);
     py+=CTracker.alarms.height+2;
     canvasP5.fill(this.alarmBatteryColor);
     canvasP5.rect(this.x - CTracker.baseSemiWidth, py, CTracker.alarms.width, CTracker.alarms.height,2);
+    if(opt?.labels) canvasP5.text("batt", this.x, py+CTracker.alarms.height/2);
     py+=CTracker.alarms.height+2;
     canvasP5.fill(this.alarmMotorColor);
     canvasP5.rect(this.x - CTracker.baseSemiWidth, py, CTracker.alarms.width, CTracker.alarms.height,2);  
+    if(opt?.labels) canvasP5.text("motor", this.x, py+CTracker.alarms.height/2);
+  }
+  
+  private drawAlarm(canvasP5: p5, y:number, color: number[]): void {
+    canvasP5.fill(color);
+    canvasP5.rect(this.x - CTracker.baseSemiWidth, y, CTracker.alarms.width, CTracker.alarms.height,2);
   }
 
   private getAlarmColor(active:boolean){
