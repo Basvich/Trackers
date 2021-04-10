@@ -1,22 +1,51 @@
 
-<div class="content" role="main">
-  <mat-grid-list cols="3" rowHeight="1:1">
-    <mat-grid-tile   [style.background]="'skyblue'" [colspan]="3" [rowspan]="3">
-      <div id="containerP5"></div>
-    </mat-grid-tile>
-    <mat-grid-tile  [style.background]="'lightgreen'">2</mat-grid-tile>
-    <mat-grid-tile [style.background]="'lightpink'">3</mat-grid-tile>
-    <mat-grid-tile [style.background]="'lightblue'">
-      <mat-slider thumbLabel tickInterval="30" min="-90" max="90" step="5" value="0" (input)="onAngleChanged($event)"></mat-slider>
-      <mat-slider thumbLabel tickInterval="10" min="0" max="100" step="5" value="100" (input)="onBatteryChanged($event)">Battery</mat-slider>
-      <button mat-button (click)="invalidateDrawn()" >Draw</button>
-      <button mat-button color="primary">Primary</button>
-    </mat-grid-tile>
-  </mat-grid-list> 
-  <!-- Footer -->
-  <footer>
+<div flex fxLayout="column" class="container">
+  <div fxflex>header</div>
+  <div fxFlex>
+    <div id="containerP5"></div>
+  </div>
+  <div  id="controles" fxLayout="row"  style="background-color:lemonchiffon">
+    <div fxFlex="20" style="background-color:lightgreen">
+          <mat-slide-toggle matTooltip="Los cambios afectan a todos o al seleccionado" [(ngModel)]="selectedAllTrackers">Todos</mat-slide-toggle>  
+          <mat-form-field >    
+            <mat-label>Select</mat-label>
+            <input matInput placeholder="Ex. Pizza" type="number" id="myNumber" [disabled]="selectedAllTrackers" [(ngModel)]="selectedIdTracker"/>         
+          </mat-form-field>    
+    </div>
+    <div  fxFlex="40" style="background-color:lightblue" >
+      <mat-list>
+        <mat-list-item>        
+          <mat-label>angulo:</mat-label> <mat-slider   thumbLabel tickInterval="30" min="-90"  max="90" step="5" value="0"  (input)="onAngleChanged($event)"></mat-slider>        
+        </mat-list-item>
+        <mat-list-item>
+          <mat-label>bateria:</mat-label><mat-slider   thumbLabel tickInterval="10" min="0" max="100" step="5" value="100" (input)="onBatteryChanged($event)">Battery</mat-slider >
+        </mat-list-item>         
+      </mat-list>  
+    </div>  
+    <div  fxFlex="40" style="background-color:lightseagreen" >
+      <mat-list>
+        <mat-list-item>        
+          <mat-slide-toggle matTooltip="Alarma No coms" [(ngModel)]="alarms.noCom" (change)="onAlarmsChanged($event)">No COM</mat-slide-toggle>  
+        </mat-list-item>
+        <mat-list-item>
+          <mat-slide-toggle matTooltip="Posicion seguridad activada" [(ngModel)]="alarms.safePosition" (change)="onAlarmsChanged($event)">Safe Position</mat-slide-toggle>  
+        </mat-list-item>   
+        <mat-list-item>
+          <mat-slide-toggle matTooltip="Alarma de bateria" [(ngModel)]="alarms.battery" (change)="onAlarmsChanged($event)">Safe Position</mat-slide-toggle>  
+        </mat-list-item>  
+        <mat-list-item>
+          <mat-slide-toggle matTooltip="Alarma de motor" [(ngModel)]="alarms.motor" (change)="onAlarmsChanged($event)">Safe Position</mat-slide-toggle>  
+        </mat-list-item>         
+      </mat-list>  
+    </div>    
+  </div> 
+  <div style="background-color:lightsalmon">
+    <button mat-button (click)="invalidateDrawn()" >Draw</button>
+    <button mat-button color="primary">Primary</button>
+  </div>
+  <footer layout="row" class="md-padding">
+    This is the footer
   </footer>
-
 </div>
 
 
