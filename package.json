@@ -1,6 +1,6 @@
 {
   "name": "trackers",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -45,6 +45,7 @@
     "@types/node": "^12.11.1",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
     "@typescript-eslint/parser": "^4.19.0",
+    "angular-cli-ghpages": "^1.0.0-rc.1",
     "codelyzer": "^5.1.2",
     "eslint": "^7.23.0",
     "jasmine-core": "~3.5.0",
