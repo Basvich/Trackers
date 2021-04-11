@@ -19,6 +19,7 @@ import { P5TestComponent } from './p5-test/p5-test.component';
 import { RoutingModule } from './routing/routing.module';
 import { HomeComponent } from './home/home.component';
 import { ThreeTestComponent } from './three-test/three-test.component';
+import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.component';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import { ThreeTestComponent } from './three-test/three-test.component';
     AppComponent,  
     HomeComponent,
     P5TestComponent,
-    ThreeTestComponent
+    ThreeTestComponent,
+    ThreeBasicTestComponent
   ],
   imports: [    
     FormsModule,

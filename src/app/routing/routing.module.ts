@@ -4,12 +4,14 @@ import { Routes, RouterModule } from '@angular/router';
 import { HomeComponent } from '../home/home.component';
 import { P5TestComponent } from '../p5-test/p5-test.component';
 import { ThreeTestComponent } from '../three-test/three-test.component';
+import { ThreeBasicTestComponent } from '../three-basic-test/three-basic-test.component';
 
 
 const routes: Routes = [  
   { path: 'home', component: HomeComponent},
   { path: 'p5Test', component: P5TestComponent},
   { path: 'threeTest', component: ThreeTestComponent},
+  { path: 'threeBasicTest', component: ThreeBasicTestComponent},
   { path: '', redirectTo: '/home', pathMatch: 'full' }
 ];
 

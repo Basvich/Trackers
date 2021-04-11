@@ -1,13 +1,13 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import * as THREE from 'three'
 import {Material} from 'three';
 
 @Component({
-  selector: 'app-three-test',
-  templateUrl: './three-test.component.html',
-  styleUrls: ['./three-test.component.scss']
+  selector: 'app-three-basic-test',
+  templateUrl: './three-basic-test.component.html',
+  styleUrls: ['./three-basic-test.component.scss']
 })
-export class ThreeTestComponent implements OnInit {
+export class ThreeBasicTestComponent implements OnInit {
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
   // an array of objects who's rotation to update
