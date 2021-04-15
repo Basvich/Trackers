@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import * as THREE from 'three'
 import {Material} from 'three';
+import * as DAT from "dat.gui";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 
 @Component({
   selector: 'app-three-test',
@@ -13,6 +15,11 @@ export class ThreeTestComponent implements OnInit {
   // an array of objects who's rotation to update
   objects: THREE.Object3D[] = [];
   camera: THREE.PerspectiveCamera;
+  camControl: OrbitControls
+  panel1:THREE.Object3D;
+  // El sufijo ! indica que nunca sera nulo
+  gui!: DAT.GUI;
+
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() { }
 
@@ -20,8 +27,9 @@ export class ThreeTestComponent implements OnInit {
     const canvas = <HTMLCanvasElement>document.querySelector('#c');
     this.renderer = new THREE.WebGLRenderer({canvas: canvas});
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;    
     this.createScene();
+    this.buildDatGui();
   }
 
   public startWebGl(): void {
@@ -38,6 +46,14 @@ export class ThreeTestComponent implements OnInit {
     this.camera.position.set(0, -10, 50);
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(0, 0, 0);
+
+    this.camControl = new OrbitControls( this.camera, this.renderer.domElement );
+    this.camControl.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    this.camControl.dampingFactor = 0.05;
+    this.camControl.screenSpacePanning = false;
+    this.camControl.minDistance = 10;
+    this.camControl.maxDistance = 500;
+    //this.camControl.maxPolarAngle = Math.PI / 2;
 
     this.scene = new THREE.Scene();
     {
@@ -80,7 +96,7 @@ export class ThreeTestComponent implements OnInit {
     this.objects.push(earthMesh);
 
     //Panel
-    const panelGeometry = new THREE.BoxGeometry(4,20,1);
+    const panelGeometry = new THREE.BoxBufferGeometry(4, 20, 0.3);
     const panelMaterial=new THREE.MeshStandardMaterial({color: 0x2233FF});
     const panelMesh = new THREE.Mesh(panelGeometry, panelMaterial);
     panelMesh.receiveShadow = true;
@@ -90,6 +106,7 @@ export class ThreeTestComponent implements OnInit {
     panelMesh.rotation.y=-Math.PI/6;
     solarSystem.add(panelMesh);
     this.objects.push(panelMesh);
+    this.panel1=panelMesh;
 
     const panelMaterial2=new THREE.MeshStandardMaterial({color: 0x2233FF});
     const panelMesh2 = new THREE.Mesh(panelGeometry, panelMaterial2);
@@ -122,6 +139,15 @@ export class ThreeTestComponent implements OnInit {
 
   }
 
+  private buildDatGui(): void{
+    this.gui = new DAT.GUI();
+    const cam=this.gui.addFolder('Camera');
+    cam.add(this.camera.position, 'y', -20, 20).listen();
+    cam.add(this.camera.position, 'x', -20, 20).listen();
+    const pan=this.gui.addFolder('panel1');
+    pan.add(this.panel1.rotation, 'y', -Math.PI/2, Math.PI/2).listen;
+  }
+
   private resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer): boolean {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
@@ -139,6 +165,7 @@ export class ThreeTestComponent implements OnInit {
       this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
       this.camera.updateProjectionMatrix();
     }
+    this.camControl.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
