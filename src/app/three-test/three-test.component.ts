@@ -23,6 +23,7 @@ export class ThreeTestComponent implements OnInit {
   panel1:THREE.Object3D;
   earthMesh:THREE.Object3D;
   sunLight:THREE.DirectionalLight;
+  floor:THREE.Mesh;
   // El sufijo ! indica que nunca sera nulo
   gui!: DAT.GUI;
 
@@ -62,7 +63,7 @@ export class ThreeTestComponent implements OnInit {
 
   public onHourChanged(event: MatSliderChange): void{
     const ang=0.08+(event.value-8)*2.96/10;    
-    const d=100;
+    const d=1000;
     this.sunLight.position.set(d*Math.cos(ang), 20, d*Math.sin(ang));
   }
 
@@ -107,13 +108,13 @@ export class ThreeTestComponent implements OnInit {
       //this.scene.add(light);
     }
 
-    this.sunLight=new THREE.DirectionalLight( 0xffffff, 4 );
+    this.sunLight=new THREE.DirectionalLight( 0xffffff, 2 );
     this.sunLight.position.set( -0.5,0, 1 );
     this.sunLight.position.multiplyScalar( 50);
     this.sunLight.castShadow=true;     
     this.sunLight.shadow.mapSize.width = 1024; // default
     this.sunLight.shadow.mapSize.height = 1024; // default
-    this.sunLight.shadow.camera = new THREE.OrthographicCamera( -100, 100, 100, -100, 0.5, 1000 ); 
+    this.sunLight.shadow.camera = new THREE.OrthographicCamera( -200, 200, 200, -200, 0.5, 2000 ); 
     const d = 300;    
     this.sunLight.name = "sunLight";
     this.scene.add(this.sunLight);
@@ -166,14 +167,15 @@ export class ThreeTestComponent implements OnInit {
     this.panel1=panelMesh;
     
     const floor_geometry = new THREE.PlaneGeometry(1000,1000);
-    const floor_material = new THREE.MeshStandardMaterial({color: 0x00ff00});
-    const floor = new THREE.Mesh(floor_geometry, floor_material);
-    floor.position.set(0,0,0);
-    floor.rotation.x -= 0;//Math.PI/8;
-    floor.receiveShadow = true;
-    floor.castShadow = false;
-    this.scene.add(floor);
-    this.objects.push(floor);
+    const floor_material = new THREE.MeshStandardMaterial({color: 0xFAD7A0, emissive: 0xFAD7A0, emissiveIntensity:0.5});
+    this.floor = new THREE.Mesh(floor_geometry, floor_material);
+    
+    this.floor.position.set(0,0,0);
+    this.floor.rotation.x -= 0;//Math.PI/8;
+    this.floor.receiveShadow = true;
+    this.floor.castShadow = false;
+    this.scene.add(this.floor);
+    this.objects.push(this.floor);
 
     // add an AxesHelper to each node
     this.objects.forEach((node) => {
@@ -194,6 +196,22 @@ export class ThreeTestComponent implements OnInit {
     pan.add(this.panel1.rotation, 'y', -Math.PI/2, Math.PI/2).listen;
     const panLight=this.gui.addFolder('Light');
     panLight.add(this.sunLight.position, 'y', -100, 100).listen;
+    const panFloor=this.gui.addFolder('floor');
+    const params = {
+      modelcolor: "#ff0000",
+      emissiveIntensity:1
+    };
+    const floor=this.floor;
+    panFloor.addColor(params, 'modelcolor')
+    .name('Model Color')
+    .onChange(function() {
+      floor.material.color.set(params.modelcolor);
+    });
+    panFloor.add(params, 'emissiveIntensity',0,1)
+    .name('intensity')
+    .onChange(function() {
+      floor.material.emissiveIntensity=params.emissiveIntensity;
+    });
     const pan2=this.gui.addFolder('hearth');
     pan2.add(this.earthMesh.position, 'x',-20, 20).listen;
   }
@@ -225,15 +243,21 @@ export class ThreeTestComponent implements OnInit {
     let x=-200; let y=-100;
     const f=500;
     const panelGeometry = new THREE.BoxBufferGeometry(4, 30, 0.3);
-    const panelMaterial=new THREE.MeshStandardMaterial({color: 0x2233FF});
+    const indicatorGeom=new THREE.PlaneBufferGeometry(3,1);    
+    const panelMaterial=new THREE.MeshLambertMaterial({color: 0x2233FF}); 
+    const indicMat=new THREE.LineBasicMaterial({color:0xf01010 })   ;
     for(let i=1; i<f; i++){
-      const panelMesh = new THREE.Mesh(panelGeometry, panelMaterial);
+      const lpanelMaterial=new THREE.MeshLambertMaterial({color: 0x2233FF});    
+      const panelMesh = new THREE.Mesh(panelGeometry, lpanelMaterial);
+      const indMesh=new THREE.Mesh(indicatorGeom, indicMat);
+      indMesh.position.z=0.2;
       panelMesh.receiveShadow = true;
       panelMesh.castShadow = true;
       panelMesh.position.x = x;
       panelMesh.position.y = y;
       panelMesh.position.z=2;
       panelMesh.rotation.y=0;
+      panelMesh.add(indMesh);
       this.scene.add(panelMesh);
       this.objects.push(panelMesh);
       this.panels.push(panelMesh);
