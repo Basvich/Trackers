@@ -1,8 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import * as THREE from 'three'
-import {Material} from 'three';
+import {Material, RGBA_ASTC_10x10_Format} from 'three';
 import * as DAT from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
+import {IAlarms} from './tracksHelpers/trackHelper';
+import {MatSliderChange} from '@angular/material/slider';
+import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-three-test',
@@ -14,12 +17,24 @@ export class ThreeTestComponent implements OnInit {
   scene: THREE.Scene;
   // an array of objects who's rotation to update
   objects: THREE.Object3D[] = [];
+  panels:THREE.Object3D[]=[];
   camera: THREE.PerspectiveCamera;
   camControl: OrbitControls
   panel1:THREE.Object3D;
+  earthMesh:THREE.Object3D;
+  sunLight:THREE.DirectionalLight;
   // El sufijo ! indica que nunca sera nulo
   gui!: DAT.GUI;
 
+  selectedAllTrackers = true;
+  selectedIdTracker = 100;
+  alarms: IAlarms = {
+    noCom: false,
+    safePosition: false,
+    battery: false,
+    motor: false
+  };
+  
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() { }
 
@@ -37,6 +52,28 @@ export class ThreeTestComponent implements OnInit {
     requestAnimationFrame(this.render.bind(this));
   }
 
+  public onAngleChanged(event: MatSliderChange): void {
+    const g = event.value * Math.PI / 180;
+    const trackers = this.getSelectedTrackers();
+    trackers.forEach(tracker => {
+      tracker.rotation.y=g;
+    });
+  }
+
+  public onHourChanged(event: MatSliderChange): void{
+    const ang=0.08+(event.value-8)*2.96/10;    
+    const d=100;
+    this.sunLight.position.set(d*Math.cos(ang), 20, d*Math.sin(ang));
+  }
+
+  public onBatteryChanged(event: MatSliderChange): void {
+    
+  }
+
+  public onAlarmsChanged(event: MatSlideToggleChange): void {
+   
+  }
+
   private createScene(): void {
     const fov = 40;
     const aspect = 2;  // the canvas default
@@ -46,6 +83,8 @@ export class ThreeTestComponent implements OnInit {
     this.camera.position.set(0, -10, 50);
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(0, 0, 0);
+    //const cameraHelper = new THREE.CameraHelper( this.camera );
+    //this.scene.add( cameraHelper );
 
     this.camControl = new OrbitControls( this.camera, this.renderer.domElement );
     this.camControl.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
@@ -57,16 +96,33 @@ export class ThreeTestComponent implements OnInit {
 
     this.scene = new THREE.Scene();
     {
-      const color = 0xFFFFFF;
-      const intensity = 2;
-      const light = new THREE.PointLight(color, intensity, 100);
-      light.castShadow=true;
+      //const color = 0xFFFFFF;
+      //const intensity = 2;
+      //const light = new THREE.PointLight(color, intensity, 100);
+      //light.castShadow=true;
       //Set up shadow properties for the light
-      light.shadow.mapSize.width = 512; // default
-      light.shadow.mapSize.height = 512; // default
-      light.position.set(-10,3,6);
-      this.scene.add(light);
+      //light.shadow.mapSize.width = 512; // default
+      //light.shadow.mapSize.height = 512; // default
+      //light.position.set(-10,3,6);
+      //this.scene.add(light);
     }
+
+    this.sunLight=new THREE.DirectionalLight( 0xffffff, 4 );
+    this.sunLight.position.set( -0.5,0, 1 );
+    this.sunLight.position.multiplyScalar( 50);
+    this.sunLight.castShadow=true;     
+    this.sunLight.shadow.mapSize.width = 1024; // default
+    this.sunLight.shadow.mapSize.height = 1024; // default
+    this.sunLight.shadow.camera = new THREE.OrthographicCamera( -100, 100, 100, -100, 0.5, 1000 ); 
+    const d = 300;    
+    this.sunLight.name = "sunLight";
+    this.scene.add(this.sunLight);
+
+    const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
+    this.scene.add( cameraHelper );
+
+    const sunLightHelper=new THREE.DirectionalLightHelper(this.sunLight, 5);
+    this.scene.add(sunLightHelper);
 
     const radius = 1;
     const widthSegments = 6;
@@ -88,15 +144,16 @@ export class ThreeTestComponent implements OnInit {
 
     //Tierra
     const earthMaterial = new THREE.MeshStandardMaterial({color: 0x2233FF});
-    const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
-    earthMesh.receiveShadow = true;
-    earthMesh.castShadow = true;   
-    earthMesh.position.x = -20;
-    solarSystem.add(earthMesh);
-    this.objects.push(earthMesh);
+    this.earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
+    this.earthMesh.receiveShadow = true;
+    this.earthMesh.castShadow = true;   
+    this.earthMesh.position.set(0,0,7); 
+    solarSystem.add(this.earthMesh);
+    this.objects.push(this.earthMesh);
 
+    this.createPanels();
     //Panel
-    const panelGeometry = new THREE.BoxBufferGeometry(4, 20, 0.3);
+    const panelGeometry = new THREE.BoxBufferGeometry(4, 30, 0.3);
     const panelMaterial=new THREE.MeshStandardMaterial({color: 0x2233FF});
     const panelMesh = new THREE.Mesh(panelGeometry, panelMaterial);
     panelMesh.receiveShadow = true;
@@ -107,18 +164,7 @@ export class ThreeTestComponent implements OnInit {
     solarSystem.add(panelMesh);
     this.objects.push(panelMesh);
     this.panel1=panelMesh;
-
-    const panelMaterial2=new THREE.MeshStandardMaterial({color: 0x2233FF});
-    const panelMesh2 = new THREE.Mesh(panelGeometry, panelMaterial2);
-    panelMesh2.receiveShadow = true;
-    panelMesh2.castShadow = true;
-    panelMesh2.position.x = 15;
-    panelMesh2.position.z=2;
-    panelMesh2.rotation.y=-Math.PI/4;
-    solarSystem.add(panelMesh2);
-    this.objects.push(panelMesh2);
-
-
+    
     const floor_geometry = new THREE.PlaneGeometry(1000,1000);
     const floor_material = new THREE.MeshStandardMaterial({color: 0x00ff00});
     const floor = new THREE.Mesh(floor_geometry, floor_material);
@@ -146,6 +192,10 @@ export class ThreeTestComponent implements OnInit {
     cam.add(this.camera.position, 'x', -20, 20).listen();
     const pan=this.gui.addFolder('panel1');
     pan.add(this.panel1.rotation, 'y', -Math.PI/2, Math.PI/2).listen;
+    const panLight=this.gui.addFolder('Light');
+    panLight.add(this.sunLight.position, 'y', -100, 100).listen;
+    const pan2=this.gui.addFolder('hearth');
+    pan2.add(this.earthMesh.position, 'x',-20, 20).listen;
   }
 
   private resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer): boolean {
@@ -169,6 +219,37 @@ export class ThreeTestComponent implements OnInit {
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
+  }
+
+  private createPanels(){
+    let x=-200; let y=-100;
+    const f=500;
+    const panelGeometry = new THREE.BoxBufferGeometry(4, 30, 0.3);
+    const panelMaterial=new THREE.MeshStandardMaterial({color: 0x2233FF});
+    for(let i=1; i<f; i++){
+      const panelMesh = new THREE.Mesh(panelGeometry, panelMaterial);
+      panelMesh.receiveShadow = true;
+      panelMesh.castShadow = true;
+      panelMesh.position.x = x;
+      panelMesh.position.y = y;
+      panelMesh.position.z=2;
+      panelMesh.rotation.y=0;
+      this.scene.add(panelMesh);
+      this.objects.push(panelMesh);
+      this.panels.push(panelMesh);
+      if(i>0 && i%10==0) x+=10;
+      x+=5;
+      if(x>220){
+        y+=35;
+        x=-200;
+      }
+    }
+
+  }
+
+  protected getSelectedTrackers(): THREE.Object3D[] {
+    if (this.selectedAllTrackers) return this.panels;
+    return [this.panels[this.selectedIdTracker]];
   }
 
 }
