@@ -8,7 +8,7 @@ import { ThreeBasicTestComponent } from '../three-basic-test/three-basic-test.co
 
 
 const routes: Routes = [  
-  { path: 'home', component: HomeComponent},
+  { path: 'home', component: ThreeTestComponent},
   { path: 'p5Test', component: P5TestComponent},
   { path: 'threeTest', component: ThreeTestComponent},
   { path: 'threeBasicTest', component: ThreeBasicTestComponent},

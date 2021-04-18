@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import {Material, RGBA_ASTC_10x10_Format} from 'three';
 import * as DAT from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import {IAlarms} from './tracksHelpers/trackHelper';
+import {IAlarms, T3DTracker} from './tracksHelpers/trackHelper';
 import {MatSliderChange} from '@angular/material/slider';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 
@@ -18,6 +18,7 @@ export class ThreeTestComponent implements OnInit {
   // an array of objects who's rotation to update
   objects: THREE.Object3D[] = [];
   panels:THREE.Object3D[]=[];
+  trackers:T3DTracker[]=[];
   camera: THREE.PerspectiveCamera;
   camControl: OrbitControls
   panel1:THREE.Object3D;
@@ -28,7 +29,7 @@ export class ThreeTestComponent implements OnInit {
   gui!: DAT.GUI;
 
   selectedAllTrackers = true;
-  selectedIdTracker = 100;
+  selectedIdTracker = 245;
   alarms: IAlarms = {
     noCom: false,
     safePosition: false,
@@ -45,7 +46,11 @@ export class ThreeTestComponent implements OnInit {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;    
     this.createScene();
-    this.buildDatGui();
+    setTimeout(() => {
+      console.log("hola");
+      this.startWebGl();
+    }, 0); 
+    this.buildDatGui();     
   }
 
   public startWebGl(): void {
@@ -57,7 +62,7 @@ export class ThreeTestComponent implements OnInit {
     const g = event.value * Math.PI / 180;
     const trackers = this.getSelectedTrackers();
     trackers.forEach(tracker => {
-      tracker.rotation.y=g;
+      tracker.rotation=g;
     });
   }
 
@@ -72,7 +77,11 @@ export class ThreeTestComponent implements OnInit {
   }
 
   public onAlarmsChanged(event: MatSlideToggleChange): void {
-   
+    const trackers = this.getSelectedTrackers();
+    trackers.forEach(tracker => {
+      tracker.alarmCom = this.alarms.noCom;
+      tracker.alarmSafePos=this.alarms.safePosition;
+    });    
   }
 
   private createScene(): void {
@@ -108,12 +117,11 @@ export class ThreeTestComponent implements OnInit {
       //this.scene.add(light);
     }
 
-    this.sunLight=new THREE.DirectionalLight( 0xffffff, 2 );
-    this.sunLight.position.set( -0.5,0, 1 );
-    this.sunLight.position.multiplyScalar( 50);
+    this.sunLight=new THREE.DirectionalLight( 0xffffff, 1 );
+    this.sunLight.position.set( 0,0, 200 );
     this.sunLight.castShadow=true;     
-    this.sunLight.shadow.mapSize.width = 1024; // default
-    this.sunLight.shadow.mapSize.height = 1024; // default
+    this.sunLight.shadow.mapSize.width = 2048; 
+    this.sunLight.shadow.mapSize.height = 2048; 
     this.sunLight.shadow.camera = new THREE.OrthographicCamera( -200, 200, 200, -200, 0.5, 2000 ); 
     const d = 300;    
     this.sunLight.name = "sunLight";
@@ -125,6 +133,9 @@ export class ThreeTestComponent implements OnInit {
     const sunLightHelper=new THREE.DirectionalLightHelper(this.sunLight, 5);
     this.scene.add(sunLightHelper);
 
+    const skyLight=new THREE.HemisphereLight( 0xffffbb, 0x080820, 0.5 );
+    this.scene.add(skyLight);
+
     const radius = 1;
     const widthSegments = 6;
     const heightSegments = 6;
@@ -134,17 +145,19 @@ export class ThreeTestComponent implements OnInit {
     this.scene.add(solarSystem);
     this.objects.push(solarSystem);
 
-    const sunMaterial = new THREE.MeshStandardMaterial({color: 0xFFD700});
-    const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial); 
-    sunMesh.receiveShadow = true;
-    sunMesh.castShadow = true;   
-    sunMesh.scale.set(2, 2,2);
-    sunMesh.position.set(0,0,3);
-    solarSystem.add(sunMesh);
-    this.objects.push(sunMesh);
+    const arrow = new THREE.ArrowHelper(
+      // first argument is the direction
+      new THREE.Vector3(2, 2, 0).normalize(),
+      // second argument is the orgin
+      new THREE.Vector3(0, 0, 7),
+      // length
+      5,
+      // color
+      0x10ff00, 0.8, 0.6);
+    this.scene.add(arrow);
 
     //Tierra
-    const earthMaterial = new THREE.MeshStandardMaterial({color: 0x2233FF});
+    const earthMaterial = new THREE.MeshStandardMaterial({color: 0x10ff00});
     this.earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
     this.earthMesh.receiveShadow = true;
     this.earthMesh.castShadow = true;   
@@ -152,22 +165,10 @@ export class ThreeTestComponent implements OnInit {
     solarSystem.add(this.earthMesh);
     this.objects.push(this.earthMesh);
 
-    this.createPanels();
-    //Panel
-    const panelGeometry = new THREE.BoxBufferGeometry(4, 30, 0.3);
-    const panelMaterial=new THREE.MeshStandardMaterial({color: 0x2233FF});
-    const panelMesh = new THREE.Mesh(panelGeometry, panelMaterial);
-    panelMesh.receiveShadow = true;
-    panelMesh.castShadow = true;
-    panelMesh.position.x = +10;
-    panelMesh.position.z=2;
-    panelMesh.rotation.y=-Math.PI/6;
-    solarSystem.add(panelMesh);
-    this.objects.push(panelMesh);
-    this.panel1=panelMesh;
+    this.createPanels();  
     
     const floor_geometry = new THREE.PlaneGeometry(1000,1000);
-    const floor_material = new THREE.MeshStandardMaterial({color: 0xFAD7A0, emissive: 0xFAD7A0, emissiveIntensity:0.5});
+    const floor_material = new THREE.MeshStandardMaterial({color: 0xFAD7A0, emissive: 0xFAD7A0, emissiveIntensity:0});
     this.floor = new THREE.Mesh(floor_geometry, floor_material);
     
     this.floor.position.set(0,0,0);
@@ -178,12 +179,12 @@ export class ThreeTestComponent implements OnInit {
     this.objects.push(this.floor);
 
     // add an AxesHelper to each node
-    this.objects.forEach((node) => {
+    /* this.objects.forEach((node) => {
       const axes = new THREE.AxesHelper();
       (<Material>axes.material).depthTest = false;
       axes.renderOrder = 1;
       node.add(axes);
-    });
+    }); */
 
   }
 
@@ -191,9 +192,7 @@ export class ThreeTestComponent implements OnInit {
     this.gui = new DAT.GUI();
     const cam=this.gui.addFolder('Camera');
     cam.add(this.camera.position, 'y', -20, 20).listen();
-    cam.add(this.camera.position, 'x', -20, 20).listen();
-    const pan=this.gui.addFolder('panel1');
-    pan.add(this.panel1.rotation, 'y', -Math.PI/2, Math.PI/2).listen;
+    cam.add(this.camera.position, 'x', -20, 20).listen();    
     const panLight=this.gui.addFolder('Light');
     panLight.add(this.sunLight.position, 'y', -100, 100).listen;
     const panFloor=this.gui.addFolder('floor');
@@ -205,14 +204,14 @@ export class ThreeTestComponent implements OnInit {
     panFloor.addColor(params, 'modelcolor')
     .name('Model Color')
     .onChange(function() {
-      floor.material.color.set(params.modelcolor);
+      (<THREE.MeshStandardMaterial>(floor.material)).color.set(params.modelcolor);
     });
     panFloor.add(params, 'emissiveIntensity',0,1)
     .name('intensity')
     .onChange(function() {
-      floor.material.emissiveIntensity=params.emissiveIntensity;
+      (<THREE.MeshStandardMaterial>(floor.material)).emissiveIntensity=params.emissiveIntensity;
     });
-    const pan2=this.gui.addFolder('hearth');
+    const pan2=this.gui.addFolder('tsm');
     pan2.add(this.earthMesh.position, 'x',-20, 20).listen;
   }
 
@@ -241,6 +240,23 @@ export class ThreeTestComponent implements OnInit {
 
   private createPanels(){
     let x=-200; let y=-100;
+    const f=500;   
+    for(let i=1; i<f; i++){
+      const nTracker=new T3DTracker(x,y);
+      this.trackers.push(nTracker);
+      this.scene.add(nTracker.Mesh);      
+      if(i>0 && i%10==0) x+=10;
+      x+=5;
+      if(x>220){
+        y+=35;
+        x=-200;
+      }
+    }
+    this.panel1=this.panels[0];
+  }
+
+  private createPanelsOld(){
+    let x=-200; let y=-100;
     const f=500;
     const panelGeometry = new THREE.BoxBufferGeometry(4, 30, 0.3);
     const indicatorGeom=new THREE.PlaneBufferGeometry(3,1);    
@@ -268,12 +284,12 @@ export class ThreeTestComponent implements OnInit {
         x=-200;
       }
     }
-
+    this.panel1=this.panels[0];
   }
 
-  protected getSelectedTrackers(): THREE.Object3D[] {
-    if (this.selectedAllTrackers) return this.panels;
-    return [this.panels[this.selectedIdTracker]];
+  protected getSelectedTrackers(): T3DTracker[] {
+    if (this.selectedAllTrackers) return this.trackers;
+    return [this.trackers[this.selectedIdTracker]];
   }
 
 }
