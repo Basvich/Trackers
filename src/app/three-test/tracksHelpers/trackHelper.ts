@@ -9,6 +9,11 @@ export interface IAlarms {
     battery: boolean;
     motor: boolean;
   }
+
+  export interface IGeoPosition{
+    longitude: number;
+    latitude: number;
+  }
   
   const colorAlarm=new THREE.Color(  0xf01010);
   const colorOk=new THREE.Color( 0x10f010);

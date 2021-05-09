@@ -14,6 +14,8 @@ import { MatButtonModule} from '@angular/material/button';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatListModule} from '@angular/material/list';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {MatNativeDateModule} from '@angular/material/core';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import { P5TestComponent } from './p5-test/p5-test.component';
 import { RoutingModule } from './routing/routing.module';
@@ -45,6 +47,8 @@ import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.com
     MatSlideToggleModule,
     MatFormFieldModule ,
     MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatTooltipModule,
     RoutingModule    
   ],
