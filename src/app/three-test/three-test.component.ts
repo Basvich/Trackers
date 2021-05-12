@@ -9,7 +9,7 @@ import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import * as suncalc from "suncalc"
 import * as dateFn from "date-fns"
 import {th} from 'date-fns/locale';
-import {Console} from 'node:console';
+
 
 @Component({
   selector: 'app-three-test',
@@ -17,7 +17,7 @@ import {Console} from 'node:console';
   styleUrls: ['./three-test.component.scss']
 })
 export class ThreeTestComponent implements OnInit {
-  private solarHour:number=12;
+  private solarHour=12;
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
   // an array of objects who's rotation to update
@@ -282,9 +282,13 @@ export class ThreeTestComponent implements OnInit {
     this.utcDate=new Date(Date.UTC(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDay(), hours, minutes));
     console.log(this.utcDate);
     const sp= suncalc.getPosition(this.utcDate, this.geoPos.latitude, this.geoPos.longitude);
-    console.debug(sp);    
+    const sunTimes=suncalc.getTimes(this.utcDate, this.geoPos.latitude, this.geoPos.longitude);
+    console.debug(sunTimes);    
     const dir= -sp.azimuth; //this.solarHour*2*Math.PI/24;// 
     const elev= -sp.altitude; //Math.PI/4;
+    if(this.utcDate>sunTimes.dusk || this.utcDate<sunTimes.dawn) this.sunLight.intensity=0;
+    else this.sunLight.intensity=1;
+
    
     sunPos.applyEuler(new THREE.Euler(elev, 0, dir, "ZXY"));
     console.log(sunPos);
