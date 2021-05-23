@@ -2,7 +2,9 @@
   <button mat-icon-button [matMenuTriggerFor]="appMenu">
     <mat-icon>more_vert</mat-icon>
   </button>
-  <span> Pruebas de distintos componentes de gráficos</span>    
+  <span> Pruebas de distintos componentes de gráficos. </span>   
+  <span class="fill-remaining-space"></span>
+  <span>{{version}}</span>
 </mat-toolbar>
 <mat-menu #appMenu="matMenu">
   <button mat-menu-item>Settings</button>
@@ -13,11 +15,8 @@
   </mat-list>
 </mat-menu>
 
-<div class="content" role="main">
 
   <router-outlet></router-outlet>
   <!-- Footer -->
-  <footer>
+  <footer>    
   </footer>
-
-</div>

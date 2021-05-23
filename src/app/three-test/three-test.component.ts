@@ -67,11 +67,12 @@ export class ThreeTestComponent implements OnInit {
       console.log("hola");
       this.startWebGl();
     }, 0); 
-    this.buildDatGui();  
+    //this.buildDatGui();  
     const d=new Date();  
     d.setUTCHours(0);
     this.selectedDate=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDay(),0,0,0,0));
     console.log(this.selectedDate);
+    this.changeSunPos()
   }
 
   public startWebGl(): void {
@@ -161,8 +162,8 @@ export class ThreeTestComponent implements OnInit {
     this.sunLight.name = "sunLight";
     this.scene.add(this.sunLight);
 
-    const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
-    this.scene.add( cameraHelper );
+    /* const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
+    this.scene.add( cameraHelper ); */
 
     const sunLightHelper=new THREE.DirectionalLightHelper(this.sunLight, 5);
     this.scene.add(sunLightHelper);

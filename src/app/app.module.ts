@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import {MatBadgeModule} from '@angular/material/badge';
 import {MatCardModule} from '@angular/material/card';
 import { MatToolbarModule} from '@angular/material/toolbar';
 import { MatIconModule} from '@angular/material/icon';
@@ -38,6 +39,7 @@ import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.com
     BrowserModule,
     BrowserAnimationsModule,
     FlexLayoutModule,
+    MatBadgeModule,
     MatCardModule,
     MatToolbarModule,
     MatMenuModule,
@@ -52,7 +54,7 @@ import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.com
     MatDatepickerModule,
     MatNativeDateModule,
     MatTooltipModule,
-    RoutingModule    
+    RoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]

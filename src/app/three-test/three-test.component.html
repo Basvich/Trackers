@@ -1,85 +1,75 @@
-<div flex fxLayout="column" class="container">
-  <canvas id="c"></canvas>
-  <div id="controles" fxLayout="row" style="background-color: lemonchiffon">
-    
-    <div fxFlex="40" style="background-color: lightblue">
-      <mat-card>
-        <mat-card-header><mat-card-title>Location & Date</mat-card-title></mat-card-header>
-        <mat-card-content>
-          <mat-card-subtitle>Date Time</mat-card-subtitle>
-          <mat-form-field appearance="fill">
-            <mat-label>Choose a date</mat-label>
-            <input
-              matInput
-              [matDatepicker]="picker"
-              [(ngModel)]="selectedDate"
-              (dateChange)="changedDate($event)"
-            />
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker [startAt]="startDate"></mat-datepicker>
-          </mat-form-field>
-          <mat-list-item>
-            <mat-label>Local solar time:</mat-label>
-            <mat-slider  thumbLabel    tickInterval="2"  min="4"  max="22"  step="0.25"  value="12"(input)="onHourChanged($event)"
-            ></mat-slider>
-          </mat-list-item>
-          
-          <mat-card-subtitle>Position</mat-card-subtitle>
-          <mat-form-field>
-            <mat-label>Latitude</mat-label>
-            <input  matInput placeholder="lat"  type="number"  [(ngModel)]="geoPos.latitude"  min="-85" max="85"/>                       
-          </mat-form-field>
-          <mat-form-field>
-            <mat-label>Longitude</mat-label>
-            <input  matInput placeholder="long"  type="number"  [(ngModel)]="geoPos.longitude" min="-180" max="180" />                       
-          </mat-form-field>
-        </mat-card-content>
-        <mat-card-footer><span [innerText]="utcDate"></span></mat-card-footer>
-      </mat-card>
-      
-    </div>
-    <div fxFlex="20" style="background-color: lightgreen">
-      <mat-card>
-        <mat-card-header><mat-card-title>Tracker selection</mat-card-title></mat-card-header>
-        <mat-card-content>
+<div flex fxLayout="row" class="container">
+  <div id="controles" fxLayout="column" fxFlex="20" style="background-color: lightblue;">
+    <mat-card>
+      <mat-card-header><mat-icon mat-card-avatar>preview</mat-icon><mat-card-title>Date</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="fill" id="dateTimeId" >
+          <mat-label>Fecha</mat-label>
+          <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="changedDate($event)"  [maxlength]="10"/>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker [startAt]="startDate"></mat-datepicker>
+        </mat-form-field>          
+        <mat-label>Hora</mat-label>
+        <mat-slider  thumbLabel    tickInterval="2"  min="4" matTooltip="Hora solar local"
+          max="22"  step="0.25"  value="12"(input)="onHourChanged($event)">
+        </mat-slider>
+      </mat-card-content>
+      <mat-card-footer><span class="fs-8" matTooltip="Fecha UTC">{{utcDate | date:'medium' }}</span></mat-card-footer>
+    </mat-card>
+    <mat-card>
+      <mat-card-header><mat-icon mat-card-avatar>my_location</mat-icon><mat-card-title>Location</mat-card-title></mat-card-header>
+      <mat-card-content>          
+        <mat-form-field>
+          <mat-label>Latitude</mat-label>
+          <input  matInput placeholder="lat"  type="number"  [(ngModel)]="geoPos.latitude"  min="-85" max="85" />                       
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Longitude</mat-label>
+          <input  matInput placeholder="long"  type="number"  [(ngModel)]="geoPos.longitude" min="-180" max="180" />                       
+        </mat-form-field>         
+      </mat-card-content>      
+    </mat-card> 
+    <mat-card>
+      <mat-card-header><mat-icon mat-card-avatar>select_all</mat-icon><mat-card-title>Tracker selection</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-form-field floatLabel="always" appearance="none">            
           <mat-slide-toggle  matTooltip="Los cambios afectan a todos o al seleccionado"  [(ngModel)]="selectedAllTrackers">All selected</mat-slide-toggle>
-          <mat-form-field>
-            <mat-label>Only select</mat-label>
-            <input    matInput   placeholder="Tracker number" type="number" 
-              id="myNumber" [disabled]="selectedAllTrackers" [(ngModel)]="selectedIdTracker"/> 
-          </mat-form-field>
-        </mat-card-content>
-      </mat-card>
-    </div>
-    <div fxFlex="40" style="background-color: lightblue">
-      <mat-card>
-        <mat-card-header><mat-card-title>Tracker</mat-card-title></mat-card-header>
-        <mat-card-content>
-          <mat-card-subtitle>Movimiento</mat-card-subtitle>         
-            <mat-label>angulo:</mat-label>
-            <mat-slider thumbLabel tickInterval="30"  min="-80"  max="80" step="5" value="0" (input)="onAngleChanged($event)">                
-            </mat-slider>
-            <mat-label>bateria:</mat-label>
-            <mat-slider  thumbLabel tickInterval="10" min="0" max="100"
-              step="5" value="100" (input)="onBatteryChanged($event)" [disabled]="true">
-              Battery
-            </mat-slider>
-          <mat-card-subtitle>Indicadores</mat-card-subtitle>         
-            <mat-slide-toggle  matTooltip="Alarma No coms"  [(ngModel)]="alarms.noCom"(change)="onAlarmsChanged($event)">
-              No COM
-            </mat-slide-toggle>
-            <mat-slide-toggle matTooltip="Posicion seguridad activada" [(ngModel)]="alarms.safePosition" (change)="onAlarmsChanged($event)">
-              Safe Position
-            </mat-slide-toggle>
-            <mat-slide-toggle matTooltip="Alarma de bateria" [(ngModel)]="alarms.battery" (change)="onAlarmsChanged($event)" [disabled]="true">
-              bateria
-            </mat-slide-toggle>
-            <!--  <mat-list-item>
-                  <mat-slide-toggle matTooltip="Alarma de motor" [(ngModel)]="alarms.motor" (change)="onAlarmsChanged($event)" [disabled]="true">motor</mat-slide-toggle>  
-                </mat-list-item>     -->
-        </mat-card-content>
-      </mat-card>      
-    </div>
+          <textarea matInput hidden></textarea>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Only selected</mat-label>
+          <input    matInput   placeholder="Tracker number" type="number" 
+            id="myNumber" [disabled]="selectedAllTrackers" [(ngModel)]="selectedIdTracker"/> 
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>  
+   <!--  <mat-card>
+      <mat-card-header><mat-icon mat-card-avatar>exposure</mat-icon><mat-card-title>Tracker</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <mat-card-subtitle>Movimiento</mat-card-subtitle>         
+          <mat-label>angulo:</mat-label>
+          <mat-slider thumbLabel tickInterval="30"  min="-80"  max="80" step="5" value="0" (input)="onAngleChanged($event)">                
+          </mat-slider>
+          <mat-label>bateria:</mat-label>
+          <mat-slider  thumbLabel tickInterval="10" min="0" max="100"
+            step="5" value="100" (input)="onBatteryChanged($event)" [disabled]="true">
+            Battery
+          </mat-slider>
+        <mat-card-subtitle>Indicadores</mat-card-subtitle>         
+          <mat-slide-toggle  matTooltip="Alarma No coms"  [(ngModel)]="alarms.noCom"(change)="onAlarmsChanged($event)">
+            No COM
+          </mat-slide-toggle>
+          <mat-slide-toggle matTooltip="Posicion seguridad activada" [(ngModel)]="alarms.safePosition" (change)="onAlarmsChanged($event)">
+            Safe Position
+          </mat-slide-toggle>
+          <mat-slide-toggle matTooltip="Alarma de bateria" [(ngModel)]="alarms.battery" (change)="onAlarmsChanged($event)" [disabled]="true">
+            bateria
+          </mat-slide-toggle> 
+      </mat-card-content>
+    </mat-card>  -->   
   </div>
-  <div style="background-color: lightsalmon"></div>
+  <div id="controles" fxLayout="column" fxFlex="80" style="background-color: lightcoral;">
+    <canvas id="c" ></canvas>
+  </div>
 </div>
