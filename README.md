@@ -29,10 +29,13 @@ npx angular-cli-ghpages — dir=dist/trackers
 https://Basvich.github.io/Trackers/
 
 otra mas (https://www.npmjs.com/package/angular-cli-ghpages#prerequisites):
-
+Esto instala el cliente para despliegue
 ```ng add angular-cli-ghpages```
 
+//Esto lo despliega
 ```ng deploy --base-href=/Trackers/```
+
+
 probar en: [Trackers](https://Basvich.github.io/Trackers/)  
 ## Running unit tests
 
