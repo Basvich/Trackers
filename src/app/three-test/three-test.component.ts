@@ -3,9 +3,13 @@ import * as THREE from 'three'
 import {Material, RGBA_ASTC_10x10_Format} from 'three';
 import * as DAT from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import {IAlarms, T3DTracker} from './tracksHelpers/trackHelper';
+import {IAlarms, IGeoPosition, T3DTracker} from './tracksHelpers/trackHelper';
 import {MatSliderChange} from '@angular/material/slider';
 import {MatSlideToggleChange} from '@angular/material/slide-toggle';
+import * as suncalc from "suncalc"
+import * as dateFn from "date-fns"
+import {th} from 'date-fns/locale';
+
 
 @Component({
   selector: 'app-three-test',
@@ -13,6 +17,7 @@ import {MatSlideToggleChange} from '@angular/material/slide-toggle';
   styleUrls: ['./three-test.component.scss']
 })
 export class ThreeTestComponent implements OnInit {
+  private solarHour=12;
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
   // an array of objects who's rotation to update
@@ -28,6 +33,14 @@ export class ThreeTestComponent implements OnInit {
   // El sufijo ! indica que nunca sera nulo
   gui!: DAT.GUI;
 
+  public geoPos: IGeoPosition={
+    longitude:-5.6629861,
+    latitude: 43.5481303
+  }
+
+  eulerX:number=0;
+  eulerZ:number=0; 
+
   selectedAllTrackers = true;
   selectedIdTracker = 245;
   alarms: IAlarms = {
@@ -36,6 +49,10 @@ export class ThreeTestComponent implements OnInit {
     battery: false,
     motor: false
   };
+
+  public selectedDate:Date;
+  public utcDate:Date;
+  startDate = new Date(2021, 0, 1);
   
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() { }
@@ -50,7 +67,12 @@ export class ThreeTestComponent implements OnInit {
       console.log("hola");
       this.startWebGl();
     }, 0); 
-    this.buildDatGui();     
+    //this.buildDatGui();  
+    const d=new Date();  
+    d.setUTCHours(0);
+    this.selectedDate=new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDay(),0,0,0,0));
+    console.log(this.selectedDate);
+    this.changeSunPos()
   }
 
   public startWebGl(): void {
@@ -67,9 +89,20 @@ export class ThreeTestComponent implements OnInit {
   }
 
   public onHourChanged(event: MatSliderChange): void{
-    const ang=0.08+(event.value-8)*2.96/10;    
+    this.solarHour=(event.value);
+    this.changeSunPos();
+    /* const ang=0.08+(event.value-8)*2.96/10;    
     const d=1000;
-    this.sunLight.position.set(d*Math.cos(ang), 20, d*Math.sin(ang));
+    this.sunLight.position.set(d*Math.cos(ang), 20, d*Math.sin(ang)); */
+  }
+  public changedDate(event: any):void{
+    console.log(event.value);
+     console.log(this.selectedDate);
+     this.changeSunPos();
+  }
+
+  public changedGeoPos(event: any):void{
+    this.changeSunPos();
   }
 
   public onBatteryChanged(event: MatSliderChange): void {
@@ -118,7 +151,9 @@ export class ThreeTestComponent implements OnInit {
     }
 
     this.sunLight=new THREE.DirectionalLight( 0xffffff, 1 );
-    this.sunLight.position.set( 0,0, 200 );
+    this.sunLight.position.set( 0,200,0 );
+    this.sunLight.position.applyEuler(new THREE.Euler(Math.PI/4, 0, 0, 'XYZ'));
+    
     this.sunLight.castShadow=true;     
     this.sunLight.shadow.mapSize.width = 2048; 
     this.sunLight.shadow.mapSize.height = 2048; 
@@ -127,8 +162,8 @@ export class ThreeTestComponent implements OnInit {
     this.sunLight.name = "sunLight";
     this.scene.add(this.sunLight);
 
-    const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
-    this.scene.add( cameraHelper );
+    /* const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
+    this.scene.add( cameraHelper ); */
 
     const sunLightHelper=new THREE.DirectionalLightHelper(this.sunLight, 5);
     this.scene.add(sunLightHelper);
@@ -236,6 +271,29 @@ export class ThreeTestComponent implements OnInit {
 
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render.bind(this));
+  }
+
+  private changeSunPos(){
+    console.log(`changeSunPos: ${this.solarHour}`);
+    const sunPos=new THREE.Vector3(0, -200, 0);        
+    let minutes=Math.floor(this.solarHour*60-this.geoPos.longitude*4);
+    const hours=Math.floor(minutes/60);
+    minutes=minutes-hours*60;
+    console.log({hours, minutes});
+    this.utcDate=new Date(Date.UTC(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDay(), hours, minutes));
+    console.log(this.utcDate);
+    const sp= suncalc.getPosition(this.utcDate, this.geoPos.latitude, this.geoPos.longitude);
+    const sunTimes=suncalc.getTimes(this.utcDate, this.geoPos.latitude, this.geoPos.longitude);
+    console.debug(sunTimes);    
+    const dir= -sp.azimuth; //this.solarHour*2*Math.PI/24;// 
+    const elev= -sp.altitude; //Math.PI/4;
+    if(this.utcDate>sunTimes.dusk || this.utcDate<sunTimes.dawn) this.sunLight.intensity=0;
+    else this.sunLight.intensity=1;
+
+   
+    sunPos.applyEuler(new THREE.Euler(elev, 0, dir, "ZXY"));
+    console.log(sunPos);
+    this.sunLight.position.set(sunPos.x, sunPos.y, sunPos.z); 
   }
 
   private createPanels(){

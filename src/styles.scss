@@ -2,3 +2,49 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+footer {
+  background-color: rgb(179, 247, 202);
+  border-top: 1px solid #bbb;
+  text-align: center;
+}
+
+.fs-8 {
+    span,p {
+        font-size: 8;
+    }
+}
+.fs-11 {
+    span,p {
+      font-size: 11;
+    }
+  }
+
+ 
+  #dateTimeId{
+    zoom: 1;
+  }
+
+  .mat-badge-content {
+    width: auto;
+    display: grid;
+    min-width: 32px;
+    min-height: 28px;
+    text-align: center;
+    align-items: center;
+    padding: 5px 3px;
+    top: -20px;
+    right: -22px;
+}
+
+.fill-remaining-space {
+  flex: 1 1 auto;
+}
+
+.mat-success {
+  background-color: green;
+  color: #fff;
+}
+
+mat-form-field.mat-form-field.mat-form-field-appearance-outline > div.mat-form-field-wrapper > div.mat-form-field-flex > div.mat-form-field-infix  { padding: 0.4em 0px }
+mat-form-field.mat-form-field.mat-form-field-appearance-outline > div.mat-form-field-wrapper > div.mat-form-field-flex > div.mat-form-field-infix > span.mat-form-field-label-wrapper { top: -1.5em; }
