@@ -1,20 +1,19 @@
-<mat-toolbar color="primary">  
+<mat-toolbar color="primary"> 
   <button mat-icon-button [matMenuTriggerFor]="appMenu">
     <mat-icon>more_vert</mat-icon>
   </button>
   <span> Pruebas de distintos componentes de gráficos. </span>   
   <span class="fill-remaining-space"></span>
   <span>{{version}}</span>
+  <mat-menu #appMenu="matMenu">
+    <button mat-menu-item>Settings</button>
+    <button mat-menu-item>Help</button>
+    <mat-list>
+      <a mat-list-item routerLink="/threeTest" routerLinkActive="active">3D Test</a>
+      <a mat-list-item routerLink="/p5Test" routerLinkActive="active">2D Test</a>
+    </mat-list>
+  </mat-menu>
 </mat-toolbar>
-<mat-menu #appMenu="matMenu">
-  <button mat-menu-item>Settings</button>
-  <button mat-menu-item>Help</button>
-  <mat-list>
-    <a mat-list-item routerLink="/threeTest" routerLinkActive="active">3D Test</a>
-    <a mat-list-item routerLink="/p5Test" routerLinkActive="active">2D Test</a>
-  </mat-list>
-</mat-menu>
-
 
   <router-outlet></router-outlet>
   <!-- Footer -->

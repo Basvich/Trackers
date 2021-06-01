@@ -15,6 +15,7 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatButtonModule} from '@angular/material/button';
 import {MatGridListModule} from '@angular/material/grid-list';
 import {MatListModule} from '@angular/material/list';
+import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatNativeDateModule} from '@angular/material/core';
@@ -48,6 +49,7 @@ import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.com
     MatIconModule,
     MatGridListModule,
     MatListModule,
+    MatSidenavModule,
     MatSlideToggleModule,
     MatFormFieldModule ,
     MatInputModule,
