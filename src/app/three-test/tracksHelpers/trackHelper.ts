@@ -48,7 +48,7 @@ export interface IAlarms {
       (<THREE.LineBasicMaterial>this.NoComMesh.material).color=color;
     }
     
-    public constructor(public x: number, public y: number) {
+    public constructor(public x: number, public y: number, public z:number=0) {
       this.createMesh();
     } 
 
@@ -58,7 +58,7 @@ export interface IAlarms {
       panelMesh.castShadow = true;
       panelMesh.position.x = this.x;
       panelMesh.position.y = this.y;
-      panelMesh.position.z=2;
+      panelMesh.position.z=this.z + 3;
       panelMesh.rotation.y=0;
       const spMat=new THREE.LineBasicMaterial({color:0x10f010 })   ;
       const sp=new THREE.Mesh(indicatorGeom, spMat);

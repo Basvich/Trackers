@@ -18,6 +18,7 @@ import {th} from 'date-fns/locale';
 })
 export class ThreeTestComponent implements OnInit {
   private solarHour=12;
+  static offset={x:-200,y:-100};
   renderer: THREE.WebGLRenderer;
   scene: THREE.Scene;
   // an array of objects who's rotation to update
@@ -184,7 +185,7 @@ export class ThreeTestComponent implements OnInit {
       // first argument is the direction
       new THREE.Vector3(2, 2, 0).normalize(),
       // second argument is the orgin
-      new THREE.Vector3(0, 0, 7),
+      new THREE.Vector3(0, 0, 35),
       // length
       5,
       // color
@@ -196,10 +197,11 @@ export class ThreeTestComponent implements OnInit {
     this.earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
     this.earthMesh.receiveShadow = true;
     this.earthMesh.castShadow = true;   
-    this.earthMesh.position.set(0,0,7); 
+    this.earthMesh.position.set(0,0,35); 
     solarSystem.add(this.earthMesh);
     this.objects.push(this.earthMesh);
 
+    this.createFloor3D();
     this.createPanels();  
     
     const floor_geometry = new THREE.PlaneGeometry(1000,1000);
@@ -297,10 +299,14 @@ export class ThreeTestComponent implements OnInit {
   }
 
   private createPanels(){
-    let x=-200; let y=-100;
+    let x=ThreeTestComponent.offset.x; let y=ThreeTestComponent.offset.y;
+    let mx=-500;
+    console.log({x,y});
     const f=500;   
     for(let i=1; i<f; i++){
-      const nTracker=new T3DTracker(x,y);
+      mx=Math.max(x,mx);
+      const z=this.calculateHeight(x,y);
+      const nTracker=new T3DTracker(x, y, z);
       this.trackers.push(nTracker);
       this.scene.add(nTracker.Mesh);      
       if(i>0 && i%10==0) x+=10;
@@ -311,6 +317,47 @@ export class ThreeTestComponent implements OnInit {
       }
     }
     this.panel1=this.panels[0];
+    
+    console.log({mx,y});
+  }
+
+  private createFloor3D(){
+    const w=500; const h=300;
+    const geometry = new THREE.PlaneGeometry( w, h, 40,40 );
+    const x0=w/2; const y0=h/2;
+    const ofx=-250; const ofy=-150;
+    const groundMaterial = new THREE.MeshPhongMaterial( { color: 0xC7C7C7 } );
+		const terrainMesh = new THREE.Mesh( geometry, groundMaterial );
+		terrainMesh.receiveShadow = true;
+		terrainMesh.castShadow = true;
+    terrainMesh.position.z=0;    
+    terrainMesh.position.x=x0+ofx;
+    terrainMesh.position.y=y0+ofy;
+    const vertices = geometry.attributes.position.array;
+    const positions=geometry.attributes.position;
+    console.log(positions.count);
+    for ( let i=0;i<positions.count;i++ ) {      
+      //vertices[ j + 1 ] = 0;
+      const xx=x0+positions.getX(i)+ofx;
+      const yy=y0+positions.getY(i)+ofy;
+      const zz=this.calculateHeight(xx,yy);
+      positions.setZ(i,zz);
+      //console.log({i, xx, yy, zz});
+    }
+    geometry.computeVertexNormals(); // needed for helper
+    this.scene.add(terrainMesh);
+    const edges = new THREE.EdgesGeometry( geometry );
+    const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x1000ff, linewidth:4 } ) );
+    this.scene.add( line );
+  }
+
+  private calculateHeight(x:number, y: number):number{
+    const dx=x-150;
+    const dy=y-300;
+    let dis=Math.sqrt(dx*dx+dy*dy);
+    dis=dis*(Math.PI/2.0)/200;
+    const h=(Math.sin(dis)**2) *20+20;
+    return h;
   }
 
   private createPanelsOld(){
