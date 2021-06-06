@@ -60,9 +60,9 @@ export class ThreeTestComponent implements OnInit {
 
   ngOnInit(): void {
     const canvas = <HTMLCanvasElement>document.querySelector('#c');
-    this.renderer = new THREE.WebGLRenderer({canvas: canvas});
+    this.renderer = new THREE.WebGLRenderer({canvas: canvas, antialias:true});
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;    
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;        
     this.createScene();
     setTimeout(() => {
       console.log("hola");
@@ -124,7 +124,8 @@ export class ThreeTestComponent implements OnInit {
     const near = 0.1;
     const far = 1000;
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this.camera.position.set(0, -10, 50);
+    //Posicion inicial de la camara
+    this.camera.position.set(0, -120, 100);
     this.camera.up.set(0, 1, 0);
     this.camera.lookAt(0, 0, 0);
     //const cameraHelper = new THREE.CameraHelper( this.camera );
@@ -152,22 +153,24 @@ export class ThreeTestComponent implements OnInit {
     }
 
     this.sunLight=new THREE.DirectionalLight( 0xffffff, 1 );
-    this.sunLight.position.set( 0,200,0 );
+    this.sunLight.position.set( 0,300,0 );
     this.sunLight.position.applyEuler(new THREE.Euler(Math.PI/4, 0, 0, 'XYZ'));
     
     this.sunLight.castShadow=true;     
     this.sunLight.shadow.mapSize.width = 2048; 
     this.sunLight.shadow.mapSize.height = 2048; 
-    this.sunLight.shadow.camera = new THREE.OrthographicCamera( -200, 200, 200, -200, 0.5, 2000 ); 
-    const d = 300;    
+    this.sunLight.shadow.bias=-0.0005;
+    const d = 250;    
+    this.sunLight.shadow.camera = new THREE.OrthographicCamera( -d, d, d, -d,10, 2000 ); 
+    
     this.sunLight.name = "sunLight";
     this.scene.add(this.sunLight);
 
-    /* const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
-    this.scene.add( cameraHelper ); */
+    const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
+    this.scene.add( cameraHelper );
 
-    const sunLightHelper=new THREE.DirectionalLightHelper(this.sunLight, 5);
-    this.scene.add(sunLightHelper);
+    /* const sunLightHelper=new THREE.DirectionalLightHelper(this.sunLight, 5);
+    this.scene.add(sunLightHelper); */
 
     const skyLight=new THREE.HemisphereLight( 0xffffbb, 0x080820, 0.5 );
     this.scene.add(skyLight);
@@ -204,7 +207,7 @@ export class ThreeTestComponent implements OnInit {
     this.createFloor3D();
     this.createPanels();  
     
-    const floor_geometry = new THREE.PlaneGeometry(1000,1000);
+    /* const floor_geometry = new THREE.PlaneGeometry(1000,1000);
     const floor_material = new THREE.MeshStandardMaterial({color: 0xFAD7A0, emissive: 0xFAD7A0, emissiveIntensity:0});
     this.floor = new THREE.Mesh(floor_geometry, floor_material);
     
@@ -213,7 +216,7 @@ export class ThreeTestComponent implements OnInit {
     this.floor.receiveShadow = true;
     this.floor.castShadow = false;
     this.scene.add(this.floor);
-    this.objects.push(this.floor);
+    this.objects.push(this.floor); */
 
     // add an AxesHelper to each node
     /* this.objects.forEach((node) => {
@@ -277,7 +280,7 @@ export class ThreeTestComponent implements OnInit {
 
   private changeSunPos(){
     console.log(`changeSunPos: ${this.solarHour}`);
-    const sunPos=new THREE.Vector3(0, -200, 0);        
+    const sunPos=new THREE.Vector3(0, -400, 0);        
     let minutes=Math.floor(this.solarHour*60-this.geoPos.longitude*4);
     const hours=Math.floor(minutes/60);
     minutes=minutes-hours*60;
@@ -346,9 +349,9 @@ export class ThreeTestComponent implements OnInit {
     }
     geometry.computeVertexNormals(); // needed for helper
     this.scene.add(terrainMesh);
-    const edges = new THREE.EdgesGeometry( geometry );
+    /* const edges = new THREE.EdgesGeometry( geometry );
     const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x1000ff, linewidth:4 } ) );
-    this.scene.add( line );
+    this.scene.add( line ); */
   }
 
   private calculateHeight(x:number, y: number):number{
