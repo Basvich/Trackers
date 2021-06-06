@@ -2,20 +2,19 @@
 <mat-sidenav-container fxFlexFill>
   <mat-sidenav mode="side" opened  >
     <mat-card>
-    <mat-card-header><mat-icon mat-card-avatar>preview</mat-icon><mat-card-title>Date</mat-card-title></mat-card-header>
+    <mat-card-header><mat-icon mat-card-avatar>preview</mat-icon><mat-card-title>Date-time</mat-card-title></mat-card-header>
     <mat-card-content>
       <mat-form-field appearance="fill" id="dateTimeId" >
         <mat-label>Fecha</mat-label>
         <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="changedDate($event)"  [maxlength]="10"/>
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker [startAt]="startDate"></mat-datepicker>
-      </mat-form-field>          
-      <mat-label>Hora</mat-label>
-      <mat-slider  thumbLabel    tickInterval="2"  min="4" matTooltip="Hora solar local"
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>                
+      <mat-slider  thumbLabel [displayWith]="formatSolarHour"   tickInterval="2"  min="4" matTooltip="Hora solar media local"
         max="22"  step="0.25"  value="12"(input)="onHourChanged($event)">
       </mat-slider>
     </mat-card-content>
-    <mat-card-footer><span class="fs-8" matTooltip="Fecha UTC">{{utcDate | date:'medium' }}</span></mat-card-footer>
+    <mat-card-footer><span class="fs-10" matTooltip="Fecha UTC">{{utcDate | date:'medium' }}</span></mat-card-footer>
     </mat-card>
     <mat-card>
       <mat-card-header><mat-icon mat-card-avatar>my_location</mat-icon><mat-card-title>Location</mat-card-title></mat-card-header>
@@ -35,12 +34,14 @@
       <mat-card-header><mat-icon mat-card-avatar>select_all</mat-icon><mat-card-title>Tracker selection</mat-card-title></mat-card-header>
       <mat-card-content>
         <mat-form-field floatLabel="always" appearance="none">            
-          <mat-slide-toggle  matTooltip="Los cambios afectan a todos o al seleccionado"  [(ngModel)]="selectedAllTrackers">All selected</mat-slide-toggle>
+          <mat-slide-toggle  matTooltip="Los cambios afectan a todos o al seleccionado"  [(ngModel)]="selectedAllTrackers" matTooltip="Seleccionar todos o solo uno"> 
+            All selected
+          </mat-slide-toggle>
           <textarea matInput hidden></textarea>
         </mat-form-field>
         <mat-form-field>
           <mat-label>Only selected</mat-label>
-          <input    matInput   placeholder="Tracker number" type="number" 
+          <input    matInput   placeholder="Tracker number" type="number" matTooltip="Id del tracker seleccionado"
             id="myNumber" [disabled]="selectedAllTrackers" [(ngModel)]="selectedIdTracker"/> 
         </mat-form-field>
       </mat-card-content>
@@ -50,7 +51,7 @@
       <mat-card-content>
         <mat-card-subtitle>Movimiento</mat-card-subtitle>         
           <mat-label>angulo:</mat-label>
-          <mat-slider thumbLabel tickInterval="30"  min="-80"  max="80" step="5" value="0" (input)="onAngleChanged($event)">                
+          <mat-slider thumbLabel tickInterval="30"  min="-80"  max="80" step="5" value="0" (input)="onAngleChanged($event)" matTooltip="Inclinacion de los tracker seleccinoados">                
           </mat-slider>    
           
         <mat-card-subtitle>Indicadores</mat-card-subtitle>         

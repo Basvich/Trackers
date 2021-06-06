@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import * as THREE from 'three'
-import {Material, RGBA_ASTC_10x10_Format} from 'three';
 import * as DAT from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import {IAlarms, IGeoPosition, T3DTracker} from './tracksHelpers/trackHelper';
@@ -9,6 +8,7 @@ import {MatSlideToggleChange} from '@angular/material/slide-toggle';
 import * as suncalc from "suncalc"
 import * as dateFn from "date-fns"
 import {th} from 'date-fns/locale';
+import {MatDatepickerInputEvent} from '@angular/material/datepicker';
 
 
 @Component({
@@ -39,8 +39,8 @@ export class ThreeTestComponent implements OnInit {
     latitude: 43.5481303
   }
 
-  eulerX:number=0;
-  eulerZ:number=0; 
+  eulerX=0;
+  eulerZ=0; 
 
   selectedAllTrackers = true;
   selectedIdTracker = 245;
@@ -53,7 +53,7 @@ export class ThreeTestComponent implements OnInit {
 
   public selectedDate:Date;
   public utcDate:Date;
-  startDate = new Date(2021, 0, 1);
+  startDate = new Date(2021, 6, 6);
   
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() { }
@@ -62,7 +62,7 @@ export class ThreeTestComponent implements OnInit {
     const canvas = <HTMLCanvasElement>document.querySelector('#c');
     this.renderer = new THREE.WebGLRenderer({canvas: canvas, antialias:true});
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;        
+    this.renderer.shadowMap.type = THREE.VSMShadowMap;        
     this.createScene();
     setTimeout(() => {
       console.log("hola");
@@ -91,24 +91,25 @@ export class ThreeTestComponent implements OnInit {
 
   public onHourChanged(event: MatSliderChange): void{
     this.solarHour=(event.value);
-    this.changeSunPos();
-    /* const ang=0.08+(event.value-8)*2.96/10;    
-    const d=1000;
-    this.sunLight.position.set(d*Math.cos(ang), 20, d*Math.sin(ang)); */
+    this.changeSunPos();  
   }
-  public changedDate(event: any):void{
+
+  public formatSolarHour(n:number): string{
+    const h=Math.floor(n);
+    const m=Math.round((n-h)*60);
+    return `${h}:${m}`;
+  }
+
+
+  public changedDate(event: MatDatepickerInputEvent<Date>):void{
     console.log(event.value);
      console.log(this.selectedDate);
      this.changeSunPos();
   }
 
-  public changedGeoPos(event: any):void{
+  public changedGeoPos(event: unknown):void{
     this.changeSunPos();
-  }
-
-  public onBatteryChanged(event: MatSliderChange): void {
-    
-  }
+  } 
 
   public onAlarmsChanged(event: MatSlideToggleChange): void {
     const trackers = this.getSelectedTrackers();
@@ -166,9 +167,9 @@ export class ThreeTestComponent implements OnInit {
     this.sunLight.name = "sunLight";
     this.scene.add(this.sunLight);
 
-    const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
+    /* const cameraHelper = new THREE.CameraHelper( this.sunLight.shadow.camera );
     this.scene.add( cameraHelper );
-
+ */
     /* const sunLightHelper=new THREE.DirectionalLightHelper(this.sunLight, 5);
     this.scene.add(sunLightHelper); */
 
@@ -285,7 +286,7 @@ export class ThreeTestComponent implements OnInit {
     const hours=Math.floor(minutes/60);
     minutes=minutes-hours*60;
     console.log({hours, minutes});
-    this.utcDate=new Date(Date.UTC(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDay(), hours, minutes));
+    this.utcDate=new Date(Date.UTC(this.selectedDate.getFullYear(), this.selectedDate.getMonth()+1, this.selectedDate.getDate(), hours, minutes));
     console.log(this.utcDate);
     const sp= suncalc.getPosition(this.utcDate, this.geoPos.latitude, this.geoPos.longitude);
     const sunTimes=suncalc.getTimes(this.utcDate, this.geoPos.latitude, this.geoPos.longitude);
@@ -335,8 +336,7 @@ export class ThreeTestComponent implements OnInit {
 		terrainMesh.castShadow = true;
     terrainMesh.position.z=0;    
     terrainMesh.position.x=x0+ofx;
-    terrainMesh.position.y=y0+ofy;
-    const vertices = geometry.attributes.position.array;
+    terrainMesh.position.y=y0+ofy;    
     const positions=geometry.attributes.position;
     console.log(positions.count);
     for ( let i=0;i<positions.count;i++ ) {      
