@@ -62,7 +62,7 @@ export class ThreeTestComponent implements OnInit {
     const canvas = <HTMLCanvasElement>document.querySelector('#c');
     this.renderer = new THREE.WebGLRenderer({canvas: canvas, antialias:true});
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.VSMShadowMap;        
+    this.renderer.shadowMap.type = THREE.VSMShadowMap;        //  THREE.PCFSoftShadowMap; //
     this.createScene();
     setTimeout(() => {
       console.log("hola");
@@ -158,8 +158,8 @@ export class ThreeTestComponent implements OnInit {
     this.sunLight.position.applyEuler(new THREE.Euler(Math.PI/4, 0, 0, 'XYZ'));
     
     this.sunLight.castShadow=true;     
-    this.sunLight.shadow.mapSize.width = 2048; 
-    this.sunLight.shadow.mapSize.height = 2048; 
+    this.sunLight.shadow.mapSize.width = 4096; 
+    this.sunLight.shadow.mapSize.height = 4096; 
     this.sunLight.shadow.bias=-0.0005;
     const d = 250;    
     this.sunLight.shadow.camera = new THREE.OrthographicCamera( -d, d, d, -d,10, 2000 ); 
@@ -303,6 +303,7 @@ export class ThreeTestComponent implements OnInit {
   }
 
   private createPanels(){
+    const large=30;
     let x=ThreeTestComponent.offset.x; let y=ThreeTestComponent.offset.y;
     let mx=-500;
     console.log({x,y});
@@ -310,7 +311,8 @@ export class ThreeTestComponent implements OnInit {
     for(let i=1; i<f; i++){
       mx=Math.max(x,mx);
       const z=this.calculateHeight(x,y);
-      const nTracker=new T3DTracker(x, y, z);
+      const pitch=this.calculatePitch(x,y,large);
+      const nTracker=new T3DTracker(x, y, z, pitch);
       this.trackers.push(nTracker);
       this.scene.add(nTracker.Mesh);      
       if(i>0 && i%10==0) x+=10;
@@ -343,7 +345,8 @@ export class ThreeTestComponent implements OnInit {
       //vertices[ j + 1 ] = 0;
       const xx=x0+positions.getX(i)+ofx;
       const yy=y0+positions.getY(i)+ofy;
-      const zz=this.calculateHeight(xx,yy);
+      const zz=this.calculateHeight(xx,yy);  
+      
       positions.setZ(i,zz);
       //console.log({i, xx, yy, zz});
     }
@@ -361,6 +364,12 @@ export class ThreeTestComponent implements OnInit {
     dis=dis*(Math.PI/2.0)/200;
     const h=(Math.sin(dis)**2) *20+20;
     return h;
+  }
+
+  private calculatePitch(x:number, y:number, length:number):number{
+    const n=this.calculateHeight(x,y+length/2);
+    const s=this.calculateHeight(x,y-length/2);
+    return Math.atan2(n-s,length);
   }
 
   private createPanelsOld(){
