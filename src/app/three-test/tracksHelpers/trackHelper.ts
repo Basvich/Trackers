@@ -28,6 +28,7 @@ export interface IAlarms {
     private safePosMesh:THREE.Mesh;
     private NoComMesh:THREE.Mesh;
     public get Mesh():THREE.Mesh {return this.panelMesh;}
+
     public set rotation(a:number){
       this.panelMesh.rotation.y=a;
     }   
@@ -48,7 +49,7 @@ export interface IAlarms {
       (<THREE.LineBasicMaterial>this.NoComMesh.material).color=color;
     }
     
-    public constructor(public x: number, public y: number, public z:number=0) {
+    public constructor(public x: number, public y: number, public z:number=0, public pitch=0) {
       this.createMesh();
     } 
 
@@ -59,6 +60,7 @@ export interface IAlarms {
       panelMesh.position.x = this.x;
       panelMesh.position.y = this.y;
       panelMesh.position.z=this.z + 3;
+      panelMesh.rotation.x=this.pitch;
       panelMesh.rotation.y=0;
       const spMat=new THREE.LineBasicMaterial({color:0x10f010 })   ;
       const sp=new THREE.Mesh(indicatorGeom, spMat);

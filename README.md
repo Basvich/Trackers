@@ -26,9 +26,11 @@ ver ejemplo en https://medium.com/tech-insights/how-to-deploy-angular-apps-to-gi
 
 ng build --prod --base-href "https://Basvich.github.io/Trackers/"
 npx angular-cli-ghpages — dir=dist/trackers
+
+
 https://Basvich.github.io/Trackers/
 
-otra mas (https://www.npmjs.com/package/angular-cli-ghpages#prerequisites):
+otra mas y mas simple (https://www.npmjs.com/package/angular-cli-ghpages#prerequisites):
 Esto instala el cliente para despliegue
 ```ng add angular-cli-ghpages```
 
