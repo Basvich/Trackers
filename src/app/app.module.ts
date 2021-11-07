@@ -6,6 +6,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {MatBadgeModule} from '@angular/material/badge';
 import {MatCardModule} from '@angular/material/card';
+import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatToolbarModule} from '@angular/material/toolbar';
 import { MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
@@ -25,6 +26,7 @@ import { RoutingModule } from './routing/routing.module';
 import { HomeComponent } from './home/home.component';
 import { ThreeTestComponent } from './three-test/three-test.component';
 import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.component';
+import { DlgGetSrvComponent } from './three-test/components/dlg-get-srv/dlg-get-srv.component';
 
 
 @NgModule({
@@ -33,7 +35,8 @@ import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.com
     HomeComponent,
     P5TestComponent,
     ThreeTestComponent,
-    ThreeBasicTestComponent
+    ThreeBasicTestComponent,
+    DlgGetSrvComponent
   ],
   imports: [    
     FormsModule,
@@ -42,6 +45,7 @@ import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.com
     FlexLayoutModule,
     MatBadgeModule,
     MatCardModule,
+    MatDialogModule,
     MatToolbarModule,
     MatMenuModule,
     MatSliderModule,

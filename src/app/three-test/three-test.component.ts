@@ -1,4 +1,5 @@
 import {Component, OnInit} from '@angular/core';
+import {Inject} from '@angular/core';
 import * as THREE from 'three'
 import * as DAT from "dat.gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
@@ -9,6 +10,8 @@ import * as suncalc from "suncalc"
 import * as dateFn from "date-fns"
 import {th} from 'date-fns/locale';
 import {MatDatepickerInputEvent} from '@angular/material/datepicker';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {DlgGetSrvComponent} from './components/dlg-get-srv/dlg-get-srv.component';
 
 
 @Component({
@@ -56,7 +59,7 @@ export class ThreeTestComponent implements OnInit {
   startDate = new Date(2021, 6, 6);
   
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor() { }
+  constructor(public dialog: MatDialog) { }
 
   ngOnInit(): void {
     const canvas = <HTMLCanvasElement>document.querySelector('#c');
@@ -79,6 +82,14 @@ export class ThreeTestComponent implements OnInit {
   public startWebGl(): void {
     // Solicita al navegador que programe el repintado de la ventana
     requestAnimationFrame(this.render.bind(this));
+  }
+
+  public openRemote():void{
+    const dialogRef =this.dialog.open(DlgGetSrvComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      //this.animal = result;
+    });
   }
 
   public onAngleChanged(event: MatSliderChange): void {
@@ -228,6 +239,8 @@ export class ThreeTestComponent implements OnInit {
     }); */
 
   }
+
+  
 
   private buildDatGui(): void{
     this.gui = new DAT.GUI();
