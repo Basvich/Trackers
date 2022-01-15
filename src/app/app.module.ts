@@ -23,10 +23,12 @@ import {MatNativeDateModule} from '@angular/material/core';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import { P5TestComponent } from './p5-test/p5-test.component';
 import { RoutingModule } from './routing/routing.module';
+import { HttpClientModule } from '@angular/common/http';
 import { HomeComponent } from './home/home.component';
 import { ThreeTestComponent } from './three-test/three-test.component';
 import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.component';
 import { DlgGetSrvComponent } from './three-test/components/dlg-get-srv/dlg-get-srv.component';
+import {GstRestSrvService} from './services/gst-rest-srv.service';
 
 
 @NgModule({
@@ -38,7 +40,8 @@ import { DlgGetSrvComponent } from './three-test/components/dlg-get-srv/dlg-get-
     ThreeBasicTestComponent,
     DlgGetSrvComponent
   ],
-  imports: [    
+  imports: [
+    HttpClientModule,
     FormsModule,
     BrowserModule,
     BrowserAnimationsModule,
@@ -62,7 +65,9 @@ import { DlgGetSrvComponent } from './three-test/components/dlg-get-srv/dlg-get-
     MatTooltipModule,
     RoutingModule
   ],
-  providers: [],
+  providers: [
+    GstRestSrvService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
