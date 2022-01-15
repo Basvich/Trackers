@@ -1,1 +1,28 @@
-<p>dlg-get-srv works!</p>
+
+    <h1 mat-dialog-title>Get data from</h1>
+<div mat-dialog-content>   
+    <mat-form-field appearance="fill">
+        <mat-label>Textarea</mat-label>
+        <textarea matInput></textarea>
+      </mat-form-field>
+    <!-- server-->
+    <mat-form-field appearance="fill">
+      <mat-label>Server</mat-label>
+      <input matInput [(ngModel)]="data.srv">
+    </mat-form-field>
+    <!--login-->
+    <mat-form-field appearance="fill">
+        <mat-label>Login</mat-label>
+        <input matInput [(ngModel)]="data.login">
+    </mat-form-field>
+    
+    <mat-form-field appearance="fill">
+       <mat-label>Password</mat-label>
+       <input matInput [(ngModel)]="data.pass">
+    </mat-form-field> 
+    <button mat-button (click)="onConnectClick()">Connect</button>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button [mat-dialog-close]="data.srv" cdkFocusInitial>Ok</button>
+</div>

@@ -85,7 +85,7 @@ export class ThreeTestComponent implements OnInit {
   }
 
   public openRemote():void{
-    const dialogRef =this.dialog.open(DlgGetSrvComponent);
+    const dialogRef =this.dialog.open(DlgGetSrvComponent, {width:'350px', data:{srv:"", plant:"", tsm:"", login:"", pass:""}});
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
       //this.animal = result;
