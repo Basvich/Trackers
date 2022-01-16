@@ -21,6 +21,7 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatNativeDateModule} from '@angular/material/core';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatSelectModule} from '@angular/material/select';
 import { P5TestComponent } from './p5-test/p5-test.component';
 import { RoutingModule } from './routing/routing.module';
 import { HttpClientModule } from '@angular/common/http';
@@ -56,6 +57,7 @@ import {GstRestSrvService} from './services/gst-rest-srv.service';
     MatIconModule,
     MatGridListModule,
     MatListModule,
+    MatSelectModule,
     MatSidenavModule,
     MatSlideToggleModule,
     MatFormFieldModule ,

@@ -21,8 +21,16 @@
        <input matInput [(ngModel)]="data.pass">
     </mat-form-field> 
     <button mat-button (click)="onConnectClick()">Connect</button>
+    <mat-form-field appearance="fill">
+      <mat-label>Planta</mat-label>
+      <mat-select placeholder="Plants" [(ngModel)]="SelectedPlantId" (change)="ChangeSelectedPlant($event)">
+        <mat-option *ngFor="let food of Plants" [value]="food.Id">
+          {{food.Name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onNoClick()">No Thanks</button>
-  <button mat-button [mat-dialog-close]="data.srv" cdkFocusInitial>Ok</button>
+  <button mat-button [mat-dialog-close]="data" (click)="close()"  cdkFocusInitial>Ok</button>
 </div>
