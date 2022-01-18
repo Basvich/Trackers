@@ -16,6 +16,7 @@ import {GstRestSrvService, PlantR} from '../services/gst-rest-srv.service';
 import {Plant} from './plant/plant';
 import {Tsc, Tsm} from './plant/tsm';
 import * as ts from 'typescript';
+import {GstSignalrService} from '../services/gst-signalr.service';
 
 
 @Component({
@@ -67,7 +68,7 @@ export class ThreeTestComponent implements OnInit {
   startDate = new Date(2021, 6, 6);
   
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor(public dialog: MatDialog, private restApi:GstRestSrvService) { }
+  constructor(public dialog: MatDialog, private restApi:GstRestSrvService, private gstSignal: GstSignalrService) { }
 
   ngOnInit(): void {
     const canvas = <HTMLCanvasElement>document.querySelector('#c');
