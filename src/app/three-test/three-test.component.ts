@@ -12,6 +12,10 @@ import {th} from 'date-fns/locale';
 import {MatDatepickerInputEvent} from '@angular/material/datepicker';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {DlgGetSrvComponent} from './components/dlg-get-srv/dlg-get-srv.component';
+import {GstRestSrvService, PlantR} from '../services/gst-rest-srv.service';
+import {Plant} from './plant/plant';
+import {Tsc, Tsm} from './plant/tsm';
+import * as ts from 'typescript';
 
 
 @Component({
@@ -34,8 +38,12 @@ export class ThreeTestComponent implements OnInit {
   earthMesh:THREE.Object3D;
   sunLight:THREE.DirectionalLight;
   floor:THREE.Mesh;
+  /** El mesh del terreno */
+  terrainMesh:THREE.Mesh;
   // El sufijo ! indica que nunca sera nulo
   gui!: DAT.GUI;
+
+  plant:Plant;
 
   public geoPos: IGeoPosition={
     longitude:-5.6629861,
@@ -59,7 +67,7 @@ export class ThreeTestComponent implements OnInit {
   startDate = new Date(2021, 6, 6);
   
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog, private restApi:GstRestSrvService) { }
 
   ngOnInit(): void {
     const canvas = <HTMLCanvasElement>document.querySelector('#c');
@@ -88,7 +96,9 @@ export class ThreeTestComponent implements OnInit {
     const dialogRef =this.dialog.open(DlgGetSrvComponent, {width:'350px', data:{srv:"", plantId:"", tsm:"", login:"", pass:""}});
     dialogRef.afterClosed().subscribe(result => {
       console.log('The dialog was closed');
-      //this.animal = result;
+      if(result.plantId){
+        this.loadPlant(result.plantId);
+      }
     });
   }
 
@@ -134,7 +144,7 @@ export class ThreeTestComponent implements OnInit {
     const fov = 40;
     const aspect = 2;  // the canvas default
     const near = 0.1;
-    const far = 1000;
+    const far = 4000;
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     //Posicion inicial de la camara
     this.camera.position.set(0, -120, 100);
@@ -365,9 +375,36 @@ export class ThreeTestComponent implements OnInit {
     }
     geometry.computeVertexNormals(); // needed for helper
     this.scene.add(terrainMesh);
+    this.terrainMesh=terrainMesh;
     /* const edges = new THREE.EdgesGeometry( geometry );
     const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x1000ff, linewidth:4 } ) );
     this.scene.add( line ); */
+    
+  }
+
+  private CreateFloor3DFromPlant(plant: Plant){
+    const w=plant.box.topHight.x-plant.box.bottLow.x;
+    const h=plant.box.topHight.y-plant.box.bottLow.y;
+    const x0=w/2; const y0=h/2;
+    const ofx=0; const ofy=0;
+    const geometry = new THREE.PlaneGeometry( w, h, 40,40 );
+    const groundMaterial = new THREE.MeshPhongMaterial( { color: 0xC7C7C7 } );
+		const terrainMesh = new THREE.Mesh( geometry, groundMaterial );
+    terrainMesh.receiveShadow = true;
+		terrainMesh.castShadow = true;
+    terrainMesh.position.z=0;    
+    const positions=geometry.attributes.position;
+    for ( let i=0;i<positions.count;i++ ) {      
+      //vertices[ j + 1 ] = 0;
+      const xx=x0+positions.getX(i)+ofx;
+      const yy=y0+positions.getY(i)+ofy;
+      const zz=0;  //Es fijo de momento      
+      positions.setZ(i,zz);
+      //console.log({i, xx, yy, zz});      
+    }
+    geometry.computeVertexNormals(); // needed for helper
+    this.scene.add(terrainMesh);
+    this.terrainMesh=terrainMesh;
   }
 
   private calculateHeight(x:number, y: number):number{
@@ -379,6 +416,14 @@ export class ThreeTestComponent implements OnInit {
     return h;
   }
 
+  /** Calcula la inclinación del tracker para estar paralelo al terreno
+   * @private
+   * @param {number} x
+   * @param {number} y
+   * @param {number} length
+   * @return {*}  {number}
+   * @memberof ThreeTestComponent
+   */
   private calculatePitch(x:number, y:number, length:number):number{
     const n=this.calculateHeight(x,y+length/2);
     const s=this.calculateHeight(x,y-length/2);
@@ -420,6 +465,90 @@ export class ThreeTestComponent implements OnInit {
   protected getSelectedTrackers(): T3DTracker[] {
     if (this.selectedAllTrackers) return this.trackers;
     return [this.trackers[this.selectedIdTracker]];
+  }
+
+  private loadPlant(plantId:string):void{
+    this.restApi.GetPlant(plantId).subscribe(p=>{
+      const nPlant=this.createPlantStructure(p);
+      nPlant.Center();
+      this.setNewPlant(nPlant);
+    });
+  }
+
+  private createPlantStructure(plantR:PlantR): Plant{
+    const plant=new Plant();
+    plant.Id=plantR.id;
+    for(var tsmr of plantR.trackerGroups){
+      const tsm=new Tsm();
+      tsm.Id=tsmr.id;
+      tsm.name=tsmr.name;
+      tsm.pos={
+        x:tsmr.utmLocation.x,
+        y:tsmr.utmLocation.y,
+        z:0
+      };
+      for(var tscR of tsmr.tsCs){
+        const tsc=new Tsc();
+        tsc.id=tscR.id;
+        tsc.topic=tscR.mqttTopic;
+        tsc.pos={
+          x:tscR.utmLocation.x,
+          y:tscR.utmLocation.y,
+          z:tscR.zCoordinate          
+        };
+        if(tsc.pos.z===undefined || tsc.pos.z===null) tsc.pos.z=0;
+        tsm.Add(tsc);
+      }
+      plant.Tsms.set(tsm.Id, tsm);      
+    } 
+    return plant;   
+  }
+
+/**
+ * Substituye los trackes actuales por la nueva planta, eliminando los antiguos
+ * @memberof ThreeTestComponent
+ */
+  private setNewPlant(plant: Plant):void{
+    // Eliminación de la escena anterior
+    this.disposeCurrentMeshes();
+    this.createTrackersFromPlant(plant);
+    this.CreateFloor3DFromPlant(plant);
+    this.plant=plant;
+  }
+
+  private createTrackersFromPlant(plant: Plant){
+    const large=20;
+    const offsetZ=3;
+    plant.Tsms.forEach(tsm => {
+      tsm.TscId.forEach(tsc => {
+        const x=tsc.pos.x;
+        const y=tsc.pos.y;
+        const z=tsc.pos.z+offsetZ;
+        const pitch= 0; //this.calculatePitch(x,y,large);
+        const nTracker=new T3DTracker(x, y, z, pitch);
+        this.trackers.push(nTracker);
+        this.scene.add(nTracker.Mesh);  
+        tsc.Tracker=nTracker;
+      }
+      )
+    });
+  }
+
+
+  /**Elimina los elementos actuales que existen en la scena      
+   * @private
+   * @memberof ThreeTestComponent
+   */
+  private disposeCurrentMeshes():void{
+    //Los trackers
+    for(var tck of this.trackers){
+      tck.Delete(this.scene);
+    }
+    this.trackers.length=0;
+    //El terreno
+    this.scene.remove(this.terrainMesh);
+    this.terrainMesh.geometry.dispose();
+    this.terrainMesh=null;
   }
 
 }

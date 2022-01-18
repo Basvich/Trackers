@@ -16,6 +16,27 @@ export interface PlantR{
   id:string;
   name:string;
   status:number;
+  trackerGroups?: TsmR[];
+}
+
+export interface UtmLocationR{
+  x:number,
+  y:number
+}
+
+export interface TsmR{
+  id:string;
+  name:string;
+  utmLocation: UtmLocationR;
+  tsCs: TscR[];
+}
+
+export interface TscR{
+  id:string;
+  mqttTopic:string;
+  name:string;
+  utmLocation: UtmLocationR;
+  zCoordinate: number;
 }
 
 @Injectable({
@@ -53,6 +74,14 @@ export class GstRestSrvService {
   public ListPlants(): Observable<PlantR[]>{
     let url=this.getUrl("api/plants");
     let resp=this.http.get<apiResponse<PlantR[]>>(url, {headers:this.headers} ).pipe(map(r=>r.result));
+    return resp;
+  }
+
+  public GetPlant(id: string): Observable<PlantR>{
+    const p=`api/plants/${id}?nesting=2&includeCleanningZones=false`;
+    const url=this.getUrl(p);
+    let resp=this.http.get<apiResponse<PlantR[]>>(url, {headers:this.headers} )
+      .pipe(map(r=>r.result[0]));
     return resp;
   }
 

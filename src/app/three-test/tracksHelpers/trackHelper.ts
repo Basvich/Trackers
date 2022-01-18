@@ -27,6 +27,7 @@ export interface IAlarms {
     private panelMesh:THREE.Mesh;
     private safePosMesh:THREE.Mesh;
     private NoComMesh:THREE.Mesh;
+    private childs:THREE.Mesh[]=[];
     public get Mesh():THREE.Mesh {return this.panelMesh;}
 
     public set rotation(a:number){
@@ -70,10 +71,17 @@ export interface IAlarms {
       const ncMat=new THREE.LineBasicMaterial({color:0x10f010 })   ;
       const nc=new THREE.Mesh(indicatorGeom, ncMat);
       nc.position.z=0.2;
-      nc.position.set(0, 1.5, 0.2);
+      nc.position.set(0, 1.5, 0.2);      
       panelMesh.add(nc);
       this.NoComMesh=nc;
 
       this.panelMesh=panelMesh;
+    }
+
+    public Delete(scene: THREE.Scene):void{
+      while (this.panelMesh.children.length){
+        this.panelMesh.remove(this.panelMesh.children[0]);
+      }
+      scene.remove(this.panelMesh);
     }
   }
