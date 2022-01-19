@@ -16,7 +16,9 @@ import {GstRestSrvService, PlantR} from '../services/gst-rest-srv.service';
 import {Plant} from './plant/plant';
 import {Tsc, Tsm} from './plant/tsm';
 import * as ts from 'typescript';
-import {GstSignalrService} from '../services/gst-signalr.service';
+import {GstSignalrService, IDataChanged} from '../services/gst-signalr.service';
+import {firstValueFrom} from 'rxjs';
+import {Variable} from '@angular/compiler/src/render3/r3_ast';
 
 
 @Component({
@@ -95,10 +97,14 @@ export class ThreeTestComponent implements OnInit {
 
   public openRemote():void{
     const dialogRef =this.dialog.open(DlgGetSrvComponent, {width:'350px', data:{srv:"", plantId:"", tsm:"", login:"", pass:""}});
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async result => {
       console.log('The dialog was closed');
+      this.gstSignal.Jwt=this.restApi.Jwt;
+      this.gstSignal.Host=result.srv;
       if(result.plantId){
-        this.loadPlant(result.plantId);
+        await this.loadPlant(result.plantId);        
+        this.conectSignalR();
+        this.loadAlarms();
       }
     });
   }
@@ -159,7 +165,7 @@ export class ThreeTestComponent implements OnInit {
     this.camControl.dampingFactor = 0.05;
     this.camControl.screenSpacePanning = false;
     this.camControl.minDistance = 10;
-    this.camControl.maxDistance = 500;
+    this.camControl.maxDistance = 2000;
     //this.camControl.maxPolarAngle = Math.PI / 2;
 
     this.scene = new THREE.Scene();
@@ -468,21 +474,52 @@ export class ThreeTestComponent implements OnInit {
     return [this.trackers[this.selectedIdTracker]];
   }
 
-  private loadPlant(plantId:string):void{
-    this.restApi.GetPlant(plantId).subscribe(p=>{
+  private async loadPlant(plantId:string):Promise<void>{
+    const p= await firstValueFrom(this.restApi.GetPlant(plantId))
+    const nPlant=this.createPlantStructure(p);
+      nPlant.Center();
+      this.setNewPlant(nPlant);
+    /* this.restApi.GetPlant(plantId).subscribe(p=>{
       const nPlant=this.createPlantStructure(p);
       nPlant.Center();
       this.setNewPlant(nPlant);
-    });
+    }); */
   }
+
+  private loadAlarms(){
+    this.restApi.GetAlarms(this.plant.Id).subscribe( alarms=>{
+      if(alarms==null) return;
+      let lastTsm:Tsm=null;
+      let lastTsc:Tsc=null;
+      for(let alarm of alarms){
+        if(!lastTsm || lastTsm.Id!=alarm.tsmId){
+          lastTsm=this.plant.Tsms.get(alarm.tsmId);
+          lastTsc=null;
+        }
+        if(!lastTsm) continue;
+        if(!lastTsc || lastTsc.id!=alarm.tscId){
+          lastTsc=lastTsm.TscId.get(alarm.tscId);
+        }
+        if(!lastTsc) continue;
+        switch(alarm.name){
+          case "CommLost":
+            lastTsc.Tracker.alarmCom=alarm.alarm;
+        }
+
+      }      
+    });
+  }  
 
   private createPlantStructure(plantR:PlantR): Plant{
     const plant=new Plant();
     plant.Id=plantR.id;
+    plant.GeoPos.latitude=plantR.geoLocation.y;
+    plant.GeoPos.longitude=plantR.geoLocation.x;
     for(var tsmr of plantR.trackerGroups){
       const tsm=new Tsm();
       tsm.Id=tsmr.id;
       tsm.name=tsmr.name;
+      tsm.Topic=tsmr.mqttTopic;
       tsm.pos={
         x:tsmr.utmLocation.x,
         y:tsmr.utmLocation.y,
@@ -500,7 +537,7 @@ export class ThreeTestComponent implements OnInit {
         if(tsc.pos.z===undefined || tsc.pos.z===null) tsc.pos.z=0;
         tsm.Add(tsc);
       }
-      plant.Tsms.set(tsm.Id, tsm);      
+      plant.AddTsm(tsm);
     } 
     return plant;   
   }
@@ -515,6 +552,8 @@ export class ThreeTestComponent implements OnInit {
     this.createTrackersFromPlant(plant);
     this.CreateFloor3DFromPlant(plant);
     this.plant=plant;
+    this.geoPos.latitude=plant.GeoPos.latitude;
+    this.geoPos.longitude=plant.GeoPos.longitude;
   }
 
   private createTrackersFromPlant(plant: Plant){
@@ -550,6 +589,50 @@ export class ThreeTestComponent implements OnInit {
     this.scene.remove(this.terrainMesh);
     this.terrainMesh.geometry.dispose();
     this.terrainMesh=null;
+  }
+
+  private conectSignalR(){   
+    this.gstSignal.SubscribeToPlant(this.plant.Id).subscribe( d=>{
+      this.processData(d);
+    });        
+    //Enviamos las peticiones para los ultimos valores
+    /* const fTsm: Tsm=this.plant.Tsms.entries().next().value[1];
+    setTimeout(() => {
+      this.gstSignal.GetLastData(this.plant.Id, fTsm.Id);
+    }, 1000);     */
+    setTimeout(() => {
+      this.plant.Tsms.forEach(tsm=>{
+        this.gstSignal.GetLastData(this.plant.Id, tsm.Id);
+      })    
+    }, 1000);
+  }
+
+  /** Procesa el mensaje recibido de datos y lo distribuye por la planta   
+   * @private
+   * @param {IDataChanged} d
+   * @memberof ThreeTestComponent
+   */
+  private processData(d:IDataChanged){
+    let variables=d.value.v;
+    if(variables==null) return;
+    let lastTsm:Tsm=null;
+    let lastTsc:Tsc=null;
+    variables.forEach(variable => {
+      let tsmTopic=variable.info.tsmId;
+      if(lastTsm===null || lastTsm.Topic !=tsmTopic){
+        lastTsm=this.plant.TsmsTopic.get(tsmTopic);
+        lastTsc=null;
+      }
+      if(!lastTsm) return;
+      let tscTopic=variable.info.tscId;
+      if(!tscTopic) return;
+      if(lastTsc===null || lastTsc.topic!=tscTopic ){
+        lastTsc=lastTsm.TscTopic.get(tscTopic);
+      }
+      if(lastTsc===null) return;
+      lastTsc.setVariableValue(variable.info.variableId, variable.value.v);
+    });
+
   }
 
 }

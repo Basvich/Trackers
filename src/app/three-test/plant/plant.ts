@@ -1,4 +1,5 @@
 import {map} from "rxjs";
+import {IGeoPosition} from "../tracksHelpers/trackHelper";
 import {Tsc, Tsm, v3D} from "./tsm";
 
 
@@ -8,7 +9,17 @@ export class Plant{
     topHight:v3D
   }
   public Id:string;  
+
+  public GeoPos:IGeoPosition={longitude:0, latitude:0};
+  /** La clave es el Id del tsm */
   public Tsms:Map<string,Tsm>= new Map<string,Tsm>();
+  /** La clave es el topic */
+  public TsmsTopic:Map<string,Tsm>= new Map<string,Tsm>();
+
+  public AddTsm(tsm: Tsm){
+    this.Tsms.set(tsm.Id,tsm);
+    this.TsmsTopic.set(tsm.Topic,tsm);
+  }
 
   /**
    * Acerca la planta a las coordenadas 0,0,0

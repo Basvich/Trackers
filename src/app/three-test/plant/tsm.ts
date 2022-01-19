@@ -9,6 +9,7 @@ export interface v3D{
 export class Tsm{
   public Id:string;
   public name:string;
+  public Topic:string;
   public pos:v3D;
   /**
    * Tscs con clave Id
@@ -37,4 +38,12 @@ export class Tsc{
   public pos:v3D;
   /** Referencia al tracker 3D */
   public Tracker: T3DTracker;
+
+  public setVariableValue(varName: string, value:number){
+    switch (varName){
+      case "Position_a1_rad":{
+        this.Tracker.rotation=value;
+      }
+    }
+  }
 }

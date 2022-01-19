@@ -30,6 +30,7 @@ import { ThreeTestComponent } from './three-test/three-test.component';
 import { ThreeBasicTestComponent } from './three-basic-test/three-basic-test.component';
 import { DlgGetSrvComponent } from './three-test/components/dlg-get-srv/dlg-get-srv.component';
 import {GstRestSrvService} from './services/gst-rest-srv.service';
+import {GstSignalrService} from './services/gst-signalr.service';
 
 
 @NgModule({
@@ -68,7 +69,8 @@ import {GstRestSrvService} from './services/gst-rest-srv.service';
     RoutingModule
   ],
   providers: [
-    GstRestSrvService
+    GstRestSrvService,
+    GstSignalrService
   ],
   bootstrap: [AppComponent]
 })

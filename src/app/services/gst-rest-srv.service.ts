@@ -17,6 +17,14 @@ export interface PlantR{
   name:string;
   status:number;
   trackerGroups?: TsmR[];
+  geoLocation?: {x:number, y: number};
+}
+
+export interface AlarmR{
+  alarm: boolean;
+  name: string;
+  tsmId: string;
+  tscId: string;  
 }
 
 export interface UtmLocationR{
@@ -27,6 +35,7 @@ export interface UtmLocationR{
 export interface TsmR{
   id:string;
   name:string;
+  mqttTopic: string;
   utmLocation: UtmLocationR;
   tsCs: TscR[];
 }
@@ -82,6 +91,14 @@ export class GstRestSrvService {
     const url=this.getUrl(p);
     let resp=this.http.get<apiResponse<PlantR[]>>(url, {headers:this.headers} )
       .pipe(map(r=>r.result[0]));
+    return resp;
+  }
+
+  public GetAlarms(id: string): Observable<AlarmR[]>{
+    const p=`api/AlarmsView/plant/${id}/all`;
+    const url=this.getUrl(p);
+    let resp=this.http.get<apiResponse<AlarmR[]>>(url, {headers:this.headers} )
+      .pipe(map(r=>r.result));
     return resp;
   }
 
