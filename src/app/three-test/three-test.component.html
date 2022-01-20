@@ -2,6 +2,10 @@
 <mat-sidenav-container fxFlexFill>
   <mat-sidenav mode="side" opened  >
     <mat-card>
+      <mat-card-header><mat-icon mat-card-avatar>settings_remote</mat-icon><mat-card-title>From server</mat-card-title></mat-card-header>
+      <mat-card-content><button mat-raised-button (click)="openRemote()">Pick one</button></mat-card-content>
+    </mat-card>
+    <mat-card>
     <mat-card-header><mat-icon mat-card-avatar>preview</mat-icon><mat-card-title>Date-time</mat-card-title></mat-card-header>
     <mat-card-content>
       <mat-form-field appearance="fill" id="dateTimeId" >

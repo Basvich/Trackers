@@ -1,0 +1,35 @@
+
+    <h1 mat-dialog-title>Get data from</h1>
+<div mat-dialog-content>   
+    <!-- server-->
+    <mat-form-field appearance="fill">
+      <mat-label>Server</mat-label>
+      <input matInput [(ngModel)]="data.srv">
+    </mat-form-field>
+    <!--login-->
+    <mat-form-field appearance="fill">
+        <mat-label>Login</mat-label>
+        <input matInput [(ngModel)]="data.login" >        
+    </mat-form-field>
+    
+    <mat-form-field appearance="fill">
+       <mat-label>Password</mat-label>
+       <input matInput [(ngModel)]="data.pass" [type]="hidePass ? 'password' : 'text'">
+       <button mat-icon-button matSuffix (click)="hidePass = !hidePass" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePass">
+        <mat-icon>{{hidePass ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+    </mat-form-field> 
+    <button mat-button (click)="onConnectClick()">Connect</button>
+    <mat-form-field appearance="fill">
+      <mat-label>Planta</mat-label>
+      <mat-select placeholder="Plants" [(ngModel)]="SelectedPlantId" (change)="ChangeSelectedPlant($event)">
+        <mat-option *ngFor="let food of Plants" [value]="food.Id">
+          {{food.Name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">No Thanks</button>
+  <button mat-button [mat-dialog-close]="data" (click)="close()"  cdkFocusInitial>Ok</button>
+</div>

@@ -20,13 +20,16 @@ export interface IAlarms {
 
   const lpanelMaterial=new THREE.MeshLambertMaterial({color: 0x2233FF});    
   const panelGeometry = new THREE.BoxBufferGeometry(4, 30, 0.3);
-  const indicatorGeom=new THREE.PlaneBufferGeometry(3,1);    
+  const indicatorGeom=new THREE.PlaneBufferGeometry(3,2);    
   
 
   export class T3DTracker {
+    private _alarmComm:boolean=false; 
+    private _flagSystemOk:boolean=true;   
     private panelMesh:THREE.Mesh;
     private safePosMesh:THREE.Mesh;
     private NoComMesh:THREE.Mesh;
+    private childs:THREE.Mesh[]=[];
     public get Mesh():THREE.Mesh {return this.panelMesh;}
 
     public set rotation(a:number){
@@ -38,13 +41,18 @@ export interface IAlarms {
     }
 
     public set alarmCom(v: boolean){
+      if(v===this._alarmComm) return;
+      this._alarmComm=v;
       let color;
       if(v) color=colorAlarm;
       else color=colorOk;
       (<THREE.LineBasicMaterial>this.safePosMesh.material).color=color;
+      
     }
 
-    public set alarmSafePos(v: boolean){
+    public set flagSystemOk(v: boolean){
+      if(v===this._flagSystemOk) return;
+      this._flagSystemOk=v;
       const color=v?colorAlarm:colorOk;      
       (<THREE.LineBasicMaterial>this.NoComMesh.material).color=color;
     }
@@ -70,10 +78,17 @@ export interface IAlarms {
       const ncMat=new THREE.LineBasicMaterial({color:0x10f010 })   ;
       const nc=new THREE.Mesh(indicatorGeom, ncMat);
       nc.position.z=0.2;
-      nc.position.set(0, 1.5, 0.2);
+      nc.position.set(0, 3, 0.2);      
       panelMesh.add(nc);
       this.NoComMesh=nc;
 
       this.panelMesh=panelMesh;
+    }
+
+    public Delete(scene: THREE.Scene):void{
+      while (this.panelMesh.children.length){
+        this.panelMesh.remove(this.panelMesh.children[0]);
+      }
+      scene.remove(this.panelMesh);
     }
   }
