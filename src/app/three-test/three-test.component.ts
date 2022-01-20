@@ -27,6 +27,7 @@ import {Variable} from '@angular/compiler/src/render3/r3_ast';
   styleUrls: ['./three-test.component.scss']
 })
 export class ThreeTestComponent implements OnInit {
+  /** Hora solar en formato decimal puro */
   private solarHour=12;
   static offset={x:-200,y:-100};
   renderer: THREE.WebGLRenderer;
@@ -501,10 +502,7 @@ export class ThreeTestComponent implements OnInit {
           lastTsc=lastTsm.TscId.get(alarm.tscId);
         }
         if(!lastTsc) continue;
-        switch(alarm.name){
-          case "CommLost":
-            lastTsc.Tracker.alarmCom=alarm.alarm;
-        }
+        lastTsc.setAlarm(alarm.name, alarm.alarm);
 
       }      
     });
@@ -552,8 +550,33 @@ export class ThreeTestComponent implements OnInit {
     this.createTrackersFromPlant(plant);
     this.CreateFloor3DFromPlant(plant);
     this.plant=plant;
+    //Ponemos la posición actual
     this.geoPos.latitude=plant.GeoPos.latitude;
     this.geoPos.longitude=plant.GeoPos.longitude;
+    //Fecha y hora actual
+    var utcnow = new Date();
+    this.selectedDate=utcnow;
+    console.log(utcnow);
+    //Paso la hora a decimal
+    let horaDec=utcnow.getUTCHours();
+    horaDec+=utcnow.getMinutes()/60;
+    //La hora solar local, se corrige con la latitud
+    horaDec+=this.geoPos.longitude*4/60;
+    console.log({horaDec});
+    this.solarHour=horaDec; //Todo, corregir con la variación eot
+    this.changeSunPos();
+  }
+
+  /**  Calcula la corrección con la hora local solar 
+   * @private
+   * @param {number} numDays El numéro de dias que pasaron en lo que va de año
+   * @return {*}  {number} la correccion a sumar a la hora local solar teorica
+   * @memberof ThreeTestComponent
+   */
+  private eot(numDays:number):number{
+    const b=360*(numDays-81)/365;
+    return 9.87*Math.sin(2*b)-7.53*Math.cos(b)-1.5*Math.sin(b);
+
   }
 
   private createTrackersFromPlant(plant: Plant){

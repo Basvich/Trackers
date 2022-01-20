@@ -42,8 +42,16 @@ export class Tsc{
   public setVariableValue(varName: string, value:number){
     switch (varName){
       case "Position_a1_rad":{
-        this.Tracker.rotation=value;
+        //Vienen con el angulo al reves de lo que usamos
+        this.Tracker.rotation=-value;
       }
+    }
+  }
+
+  public setAlarm(varName: string, value:boolean){
+    switch(varName){
+      case "CommLost":
+        this.Tracker.alarmCom=value;
     }
   }
 }

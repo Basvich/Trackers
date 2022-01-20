@@ -20,7 +20,7 @@ export interface IAlarms {
 
   const lpanelMaterial=new THREE.MeshLambertMaterial({color: 0x2233FF});    
   const panelGeometry = new THREE.BoxBufferGeometry(4, 30, 0.3);
-  const indicatorGeom=new THREE.PlaneBufferGeometry(3,1);    
+  const indicatorGeom=new THREE.PlaneBufferGeometry(3,2);    
   
 
   export class T3DTracker {
@@ -75,7 +75,7 @@ export interface IAlarms {
       const ncMat=new THREE.LineBasicMaterial({color:0x10f010 })   ;
       const nc=new THREE.Mesh(indicatorGeom, ncMat);
       nc.position.z=0.2;
-      nc.position.set(0, 1.5, 0.2);      
+      nc.position.set(0, 3, 0.2);      
       panelMesh.add(nc);
       this.NoComMesh=nc;
 
