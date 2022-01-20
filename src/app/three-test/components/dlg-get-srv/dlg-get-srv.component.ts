@@ -26,6 +26,7 @@ export class DlgGetSrvComponent implements OnInit {
   
   public Plants:SPlant[]= [];
   public SelectedPlantId:string;
+  public hidePass = true
 
   constructor(
     public dialogRef: MatDialogRef<DlgGetSrvComponent>,

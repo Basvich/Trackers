@@ -24,7 +24,8 @@ export interface IAlarms {
   
 
   export class T3DTracker {
-    private _alarmComm:boolean=false;
+    private _alarmComm:boolean=false; 
+    private _flagSystemOk:boolean=true;   
     private panelMesh:THREE.Mesh;
     private safePosMesh:THREE.Mesh;
     private NoComMesh:THREE.Mesh;
@@ -49,7 +50,9 @@ export interface IAlarms {
       
     }
 
-    public set alarmSafePos(v: boolean){
+    public set flagSystemOk(v: boolean){
+      if(v===this._flagSystemOk) return;
+      this._flagSystemOk=v;
       const color=v?colorAlarm:colorOk;      
       (<THREE.LineBasicMaterial>this.NoComMesh.material).color=color;
     }

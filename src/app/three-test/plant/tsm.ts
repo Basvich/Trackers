@@ -52,6 +52,8 @@ export class Tsc{
     switch(varName){
       case "CommLost":
         this.Tracker.alarmCom=value;
+      case "FlagSystemOk":
+        this.Tracker.flagSystemOk=!value;
     }
   }
 }
