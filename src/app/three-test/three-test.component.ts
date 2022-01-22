@@ -15,10 +15,8 @@ import {DlgGetSrvComponent} from './components/dlg-get-srv/dlg-get-srv.component
 import {GstRestSrvService, PlantR} from '../services/gst-rest-srv.service';
 import {Plant} from './plant/plant';
 import {Tsc, Tsm} from './plant/tsm';
-import * as ts from 'typescript';
 import {GstSignalrService, IDataChanged} from '../services/gst-signalr.service';
 import {firstValueFrom} from 'rxjs';
-import {Variable} from '@angular/compiler/src/render3/r3_ast';
 import Delaunator from 'delaunator';
 
 
@@ -157,7 +155,7 @@ export class ThreeTestComponent implements OnInit {
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     //Posicion inicial de la camara
     this.camera.position.set(0, -120, 100);
-    this.camera.up.set(0, 1, 0);
+    this.camera.up.set(0, 0, 1);
     this.camera.lookAt(0, 0, 0);
     //const cameraHelper = new THREE.CameraHelper( this.camera );
     //this.scene.add( cameraHelper );
@@ -165,10 +163,14 @@ export class ThreeTestComponent implements OnInit {
     this.camControl = new OrbitControls(this.camera, this.renderer.domElement);
     this.camControl.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
     this.camControl.dampingFactor = 0.05;
-    this.camControl.screenSpacePanning = false;
+    this.camControl.screenSpacePanning = true;
     this.camControl.minDistance = 10;
     this.camControl.maxDistance = 2000;
+    this.camControl.enablePan=true;    
+    this.camControl.keyPanSpeed = 7.0;	// pixels moved per arrow key push
+    this.camControl.enableKeys=true;     
     //this.camControl.maxPolarAngle = Math.PI / 2;
+ 
 
     this.scene = new THREE.Scene();
     {
@@ -517,11 +519,6 @@ export class ThreeTestComponent implements OnInit {
     const nPlant = this.createPlantStructure(p);
     nPlant.Center();
     this.setNewPlant(nPlant);
-    /* this.restApi.GetPlant(plantId).subscribe(p=>{
-      const nPlant=this.createPlantStructure(p);
-      nPlant.Center();
-      this.setNewPlant(nPlant);
-    }); */
   }
 
   private loadAlarms() {
@@ -656,15 +653,11 @@ export class ThreeTestComponent implements OnInit {
       this.processData(d);
     });
     //Enviamos las peticiones para los ultimos valores
-    /* const fTsm: Tsm=this.plant.Tsms.entries().next().value[1];
-    setTimeout(() => {
-      this.gstSignal.GetLastData(this.plant.Id, fTsm.Id);
-    }, 1000);     */
     setTimeout(() => {
       this.plant.Tsms.forEach(tsm => {
         this.gstSignal.GetLastData(this.plant.Id, tsm.Id);
       })
-    }, 1000);
+    }, 1000); 
   }
 
   /** Procesa el mensaje recibido de datos y lo distribuye por la planta   
@@ -692,7 +685,5 @@ export class ThreeTestComponent implements OnInit {
       if (lastTsc === null) return;
       lastTsc.setVariableValue(variable.info.variableId, variable.value.v);
     });
-
   }
-
 }

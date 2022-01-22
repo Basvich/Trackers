@@ -51,31 +51,6 @@ export class GstSignalrService implements OnInit  {
     //throw new Error('Method not implemented.');
   }
 
-  public Connect(){
-    const path=this.Host+this.path;
-    if(this.connection!=null){
-      this.connection.stop();
-      this.connection=null;
-    }         
-
-    this.connection = new signalR.HubConnectionBuilder()  
-    .configureLogging(signalR.LogLevel.Information)  
-    .withUrl(path, {accessTokenFactory:() => this.jwt}) 
-    .withAutomaticReconnect() 
-    .build();  
-
-    this.connection.onclose(err => {
-      console.log('SignalR hub connection closed.');
-      this.stopHubAndunSubscribeToServerEvents();
-      //this.restartConnection(err);
-    });  
-
-    this.connection.start().then(() => {
-      console.log('SignalR Hub connection started');
-      this.subscribeToServerEvents();
-    })    
-  }
-
   public SubscribeToPlant(plantId: string):Observable<IDataChanged>{
     const url=this.Host+this.path;
     if(this.connection!=null){
@@ -83,7 +58,7 @@ export class GstSignalrService implements OnInit  {
       this.connection=null;
     }  
     this.connection = new signalR.HubConnectionBuilder()
-    .withUrl(url)
+    .withUrl(url, {accessTokenFactory:()=>this.jwt})
     .build();
 
     const subject: Subject<IDataChanged> = new Subject<IDataChanged>();
@@ -105,30 +80,22 @@ export class GstSignalrService implements OnInit  {
       }
     });
     this.connection.start().then(()=>{
-      this.connection.send("ConnectToPlant", plantId);
+      setTimeout(() => {
+        var r=this.connection.send("ConnectToPlant", plantId).then(v=>{
+          console.log("ConnectToPlant ok")
+        }).catch( err => console.error(err));
+      }, 2000);      
     });
     return subject;
   }
 
   public GetLastData(plantId:string, tsmId: string){
     if(this.connection==null) return;
-    this.connection.send("GetAllVariableLastValues", plantId, tsmId);
-  }
-
-  private subscribeToServerEvents(): void {
-    this.connection.on('MessageNotification', (data: any) => {
-      this.messageReceived.emit('MessageNotification:' + data);
-    });
-    this.connection.on('PublishMessageAck', (data: any) => {
-      this.messageReceived.emit('MessageNotification - Ack :' + data);
+    this.connection.send("GetAllVariableLastValues", plantId, tsmId).then(v=>{
+      console.log("GetAllVariableLastValues ok")
     });
   }
 
-  private stopHubAndunSubscribeToServerEvents(): void {
-    this.connection.off('MessageNotification');
-    this.connection.off('PublishMessageAck');
-    this.connection.stop().then(() => console.log('Hub connection stopped'));
-  }
 
   /* private restartConnection(err: Error): void {
     console.log(`Error ${err}`);
