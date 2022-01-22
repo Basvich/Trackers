@@ -81,7 +81,7 @@ export class GstSignalrService implements OnInit  {
     });
     this.connection.start().then(()=>{
       setTimeout(() => {
-        var r=this.connection.send("ConnectToPlant", plantId).then(v=>{
+        const r=this.connection.send("ConnectToPlant", plantId).then(v=>{
           console.log("ConnectToPlant ok")
         }).catch( err => console.error(err));
       }, 2000);      

@@ -54,7 +54,7 @@ export class Plant{
       });
     });
     const cx=(this.box.bottLow.x+this.box.topHight.x)/2;
-    const cy=(this.box.bottLow.y+this.box.topHight.y)/2;
+    const cy=(this.box.bottLow.y+this.box.topHight.y)/2; 
     const cz=this.box.bottLow.z;
     //Restamos el nuevo offset a todos los datos
     this.Tsms.forEach(tsm => {

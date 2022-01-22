@@ -419,7 +419,7 @@ export class ThreeTestComponent implements OnInit {
       this.scene.add(terrainMesh);
       this.terrainMesh = terrainMesh;
     } else {
-      let points3d:THREE.Vector3[] = [];
+      const points3d:THREE.Vector3[] = [];
       plant.Tsms.forEach(tsm=>{
         tsm.TscId.forEach(tsc=>{
           points3d.push(new THREE.Vector3(tsc.pos.x, tsc.pos.y, tsc.pos.z));
@@ -432,13 +432,13 @@ export class ThreeTestComponent implements OnInit {
       points3d.push(new THREE.Vector3(plant.box.topHight.x+margen, plant.box.topHight.y+margen, 0));
       points3d.push(new THREE.Vector3(plant.box.topHight.x+margen, plant.box.bottLow.y-margen, 0)); */
 
-      let geom = new THREE.BufferGeometry().setFromPoints(points3d);
-      let indexDelaunay = Delaunator.from(
+      const geom = new THREE.BufferGeometry().setFromPoints(points3d);
+      const indexDelaunay = Delaunator.from(
         points3d.map(v => {
           return [v.y, v.x];
         })
       );
-      var meshIndex = []; // delaunay index => three.js index
+      const meshIndex = []; // delaunay index => three.js index
       for (let i = 0; i < indexDelaunay.triangles.length; i++){
         meshIndex.push(indexDelaunay.triangles[i]);
       }
@@ -547,7 +547,7 @@ export class ThreeTestComponent implements OnInit {
     plant.Id = plantR.id;
     plant.GeoPos.latitude = plantR.geoLocation.y;
     plant.GeoPos.longitude = plantR.geoLocation.x;
-    for (var tsmr of plantR.trackerGroups) {
+    for (const tsmr of plantR.trackerGroups) {
       const tsm = new Tsm();
       tsm.Id = tsmr.id;
       tsm.name = tsmr.name;
@@ -557,7 +557,7 @@ export class ThreeTestComponent implements OnInit {
         y: tsmr.utmLocation.y,
         z: 0
       };
-      for (var tscR of tsmr.tsCs) {
+      for (const tscR of tsmr.tsCs) {
         const tsc = new Tsc();
         tsc.id = tscR.id;
         tsc.topic = tscR.mqttTopic;
@@ -588,7 +588,7 @@ export class ThreeTestComponent implements OnInit {
     this.geoPos.latitude = plant.GeoPos.latitude;
     this.geoPos.longitude = plant.GeoPos.longitude;
     //Fecha y hora actual
-    var utcnow = new Date();
+    const utcnow = new Date();
     this.selectedDate = utcnow;
     console.log(utcnow);
     //Paso la hora a decimal
@@ -638,7 +638,7 @@ export class ThreeTestComponent implements OnInit {
    */
   private disposeCurrentMeshes(): void {
     //Los trackers
-    for (var tck of this.trackers) {
+    for (const tck of this.trackers) {
       tck.Delete(this.scene);
     }
     this.trackers.length = 0;
@@ -666,18 +666,18 @@ export class ThreeTestComponent implements OnInit {
    * @memberof ThreeTestComponent
    */
   private processData(d: IDataChanged) {
-    let variables = d.value.v;
+    const variables = d.value.v;
     if (variables == null) return;
     let lastTsm: Tsm = null;
     let lastTsc: Tsc = null;
     variables.forEach(variable => {
-      let tsmTopic = variable.info.tsmId;
+      const tsmTopic = variable.info.tsmId;
       if (lastTsm === null || lastTsm.Topic != tsmTopic) {
         lastTsm = this.plant.TsmsTopic.get(tsmTopic);
         lastTsc = null;
       }
       if (!lastTsm) return;
-      let tscTopic = variable.info.tscId;
+      const tscTopic = variable.info.tscId;
       if (!tscTopic) return;
       if (lastTsc === null || lastTsc.topic != tscTopic) {
         lastTsc = lastTsm.TscTopic.get(tscTopic);
