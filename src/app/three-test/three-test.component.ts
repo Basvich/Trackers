@@ -18,6 +18,7 @@ import {Tsc, Tsm} from './plant/tsm';
 import {GstSignalrService, IDataChanged} from '../services/gst-signalr.service';
 import {firstValueFrom} from 'rxjs';
 import Delaunator from 'delaunator';
+import {T3Dtsm} from './tracksHelpers/tsmHelper';
 
 
 @Component({
@@ -35,6 +36,7 @@ export class ThreeTestComponent implements OnInit {
   objects: THREE.Object3D[] = [];
   panels: THREE.Object3D[] = [];
   trackers: T3DTracker[] = [];
+  tsms: T3Dtsm[] = [];
   camera: THREE.PerspectiveCamera;
   camControl: OrbitControls
   panel1: THREE.Object3D;
@@ -166,11 +168,11 @@ export class ThreeTestComponent implements OnInit {
     this.camControl.screenSpacePanning = true;
     this.camControl.minDistance = 10;
     this.camControl.maxDistance = 2000;
-    this.camControl.enablePan=true;    
+    this.camControl.enablePan = true;
     this.camControl.keyPanSpeed = 7.0;	// pixels moved per arrow key push
-    this.camControl.enableKeys=true;     
+    this.camControl.enableKeys = true;
     //this.camControl.maxPolarAngle = Math.PI / 2;
- 
+
 
     this.scene = new THREE.Scene();
     {
@@ -419,14 +421,14 @@ export class ThreeTestComponent implements OnInit {
       this.scene.add(terrainMesh);
       this.terrainMesh = terrainMesh;
     } else {
-      const points3d:THREE.Vector3[] = [];
-      plant.Tsms.forEach(tsm=>{
-        tsm.TscId.forEach(tsc=>{
+      const points3d: THREE.Vector3[] = [];
+      plant.Tsms.forEach(tsm => {
+        tsm.TscId.forEach(tsc => {
           points3d.push(new THREE.Vector3(tsc.pos.x, tsc.pos.y, tsc.pos.z));
         })
       });
       //Añadimos 4 esquinas
-      const margen=10;
+      const margen = 10;
       /* points3d.push(new THREE.Vector3(plant.box.bottLow.x-margen, plant.box.bottLow.y-margen, 0));
       points3d.push(new THREE.Vector3(plant.box.bottLow.x-margen, plant.box.topHight.y+margen, 0));
       points3d.push(new THREE.Vector3(plant.box.topHight.x+margen, plant.box.topHight.y+margen, 0));
@@ -439,7 +441,7 @@ export class ThreeTestComponent implements OnInit {
         })
       );
       const meshIndex = []; // delaunay index => three.js index
-      for (let i = 0; i < indexDelaunay.triangles.length; i++){
+      for (let i = 0; i < indexDelaunay.triangles.length; i++) {
         meshIndex.push(indexDelaunay.triangles[i]);
       }
       geom.setIndex(meshIndex); // add three.js index to the existing geometry
@@ -526,7 +528,7 @@ export class ThreeTestComponent implements OnInit {
       if (alarms == null) return;
       let lastTsm: Tsm = null;
       let lastTsc: Tsc = null;
-      for (let alarm of alarms) {
+      for (const alarm of alarms) {
         if (!lastTsm || lastTsm.Id != alarm.tsmId) {
           lastTsm = this.plant.Tsms.get(alarm.tsmId);
           lastTsc = null;
@@ -582,6 +584,7 @@ export class ThreeTestComponent implements OnInit {
     // Eliminación de la escena anterior
     this.disposeCurrentMeshes();
     this.createTrackersFromPlant(plant);
+    this.createTsmsFromPlant(plant);
     this.CreateFloor3DFromPlant(plant);
     this.plant = plant;
     //Ponemos la posición actual
@@ -631,6 +634,19 @@ export class ThreeTestComponent implements OnInit {
     });
   }
 
+  private createTsmsFromPlant(plant: Plant) {
+    const offsetZ = 8;
+    plant.Tsms.forEach(tsm => {
+      const x = tsm.pos.x;
+      const y = tsm.pos.y;
+      const z = tsm.pos.z;
+      const nTsm3d = new T3Dtsm(x, y, offsetZ);
+      this.tsms.push(nTsm3d);
+      this.scene.add(nTsm3d.Mesh);
+      tsm.Tsm3D = nTsm3d;
+    });
+  }
+
 
   /**Elimina los elementos actuales que existen en la scena      
    * @private
@@ -642,6 +658,10 @@ export class ThreeTestComponent implements OnInit {
       tck.Delete(this.scene);
     }
     this.trackers.length = 0;
+    for (const tsm of this.tsms) {
+      tsm.Delete(this.scene);
+    }
+    this.tsms.length = 0;
     //El terreno
     this.scene.remove(this.terrainMesh);
     this.terrainMesh.geometry.dispose();
@@ -657,7 +677,7 @@ export class ThreeTestComponent implements OnInit {
       this.plant.Tsms.forEach(tsm => {
         this.gstSignal.GetLastData(this.plant.Id, tsm.Id);
       })
-    }, 1000); 
+    }, 1000);
   }
 
   /** Procesa el mensaje recibido de datos y lo distribuye por la planta   
@@ -678,12 +698,15 @@ export class ThreeTestComponent implements OnInit {
       }
       if (!lastTsm) return;
       const tscTopic = variable.info.tscId;
-      if (!tscTopic) return;
-      if (lastTsc === null || lastTsc.topic != tscTopic) {
-        lastTsc = lastTsm.TscTopic.get(tscTopic);
+      if (!tscTopic) {  //Es de un tsm solo
+        lastTsm.setVariableValue(variable.info.variableId, variable.value.v);
+      } else {
+        if (lastTsc === null || lastTsc.topic != tscTopic) {
+          lastTsc = lastTsm.TscTopic.get(tscTopic);
+        }
+        if (lastTsc === null) return;
+        lastTsc.setVariableValue(variable.info.variableId, variable.value.v);
       }
-      if (lastTsc === null) return;
-      lastTsc.setVariableValue(variable.info.variableId, variable.value.v);
     });
   }
 }

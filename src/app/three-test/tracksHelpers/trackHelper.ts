@@ -24,8 +24,8 @@ export interface IAlarms {
   
 
   export class T3DTracker {
-    private _alarmComm:boolean=false; 
-    private _flagSystemOk:boolean=true;   
+    private _alarmComm=false; 
+    private _flagSystemOk=true;   
     private panelMesh:THREE.Mesh;
     private safePosMesh:THREE.Mesh;
     private NoComMesh:THREE.Mesh;
