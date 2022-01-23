@@ -19,13 +19,13 @@ export interface IAlarms {
   const colorOk=new THREE.Color( 0x10f010);
 
   const lpanelMaterial=new THREE.MeshLambertMaterial({color: 0x2233FF});    
-  const panelGeometry = new THREE.BoxBufferGeometry(4, 30, 0.3);
+  const panelGeometry = new THREE.BoxBufferGeometry(4, 34, 0.3);
   const indicatorGeom=new THREE.PlaneBufferGeometry(3,2);    
   
 
   export class T3DTracker {
-    private _alarmComm:boolean=false; 
-    private _flagSystemOk:boolean=true;   
+    private _alarmComm=false; 
+    private _flagSystemOk=true;   
     private panelMesh:THREE.Mesh;
     private safePosMesh:THREE.Mesh;
     private NoComMesh:THREE.Mesh;
@@ -72,13 +72,13 @@ export interface IAlarms {
       panelMesh.rotation.y=0;
       const spMat=new THREE.LineBasicMaterial({color:0x10f010 })   ;
       const sp=new THREE.Mesh(indicatorGeom, spMat);
-      sp.position.set(0, 0, 0.2);
+      sp.position.set(0, 0, 0.3);
       panelMesh.add(sp);      
       this.safePosMesh=sp;
       const ncMat=new THREE.LineBasicMaterial({color:0x10f010 })   ;
       const nc=new THREE.Mesh(indicatorGeom, ncMat);
-      nc.position.z=0.2;
-      nc.position.set(0, 3, 0.2);      
+      nc.position.z=0.3;
+      nc.position.set(0, 3, 0.3);      
       panelMesh.add(nc);
       this.NoComMesh=nc;
 

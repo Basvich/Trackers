@@ -1,11 +1,12 @@
 
-<mat-sidenav-container fxFlexFill>
+
+<mat-sidenav-container >
   <mat-sidenav mode="side" opened  >
-    <mat-card>
+    <mat-card class="custom">
       <mat-card-header><mat-icon mat-card-avatar>settings_remote</mat-icon><mat-card-title>From server</mat-card-title></mat-card-header>
       <mat-card-content><button mat-raised-button (click)="openRemote()">Pick one</button></mat-card-content>
     </mat-card>
-    <mat-card>
+    <mat-card class="custom">
     <mat-card-header><mat-icon mat-card-avatar>preview</mat-icon><mat-card-title>Date-time</mat-card-title></mat-card-header>
     <mat-card-content>
       <mat-form-field appearance="fill" id="dateTimeId" >
@@ -20,7 +21,7 @@
     </mat-card-content>
     <mat-card-footer><span class="fs-10" matTooltip="Fecha UTC">{{utcDate | date:'medium' }}</span></mat-card-footer>
     </mat-card>
-    <mat-card>
+    <mat-card class="custom">
       <mat-card-header><mat-icon mat-card-avatar>my_location</mat-icon><mat-card-title>Location</mat-card-title></mat-card-header>
       <mat-card-content>          
         <mat-form-field class="latlon">
@@ -34,7 +35,7 @@
         </mat-form-field>         
       </mat-card-content>      
     </mat-card> 
-    <mat-card>
+    <mat-card class="custom">
       <mat-card-header><mat-icon mat-card-avatar>select_all</mat-icon><mat-card-title>Tracker selection</mat-card-title></mat-card-header>
       <mat-card-content>
         <mat-form-field floatLabel="always" appearance="none">            
@@ -50,7 +51,7 @@
         </mat-form-field>
       </mat-card-content>
     </mat-card>  
-    <mat-card>
+    <mat-card class="custom">
       <mat-card-header><mat-icon mat-card-avatar>exposure</mat-icon><mat-card-title>Tracker</mat-card-title></mat-card-header>
       <mat-card-content>
         <mat-card-subtitle>Movimiento</mat-card-subtitle>         
@@ -77,4 +78,5 @@
   </div>
 </mat-sidenav-content>
 </mat-sidenav-container>
+
 

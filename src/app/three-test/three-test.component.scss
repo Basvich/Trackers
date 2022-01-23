@@ -8,7 +8,17 @@
 .mat-sidenav {
   width: 300px;
   padding: 0px;
-  font-size: 80%;  
+  font-size: 80%;   
+}
+
+.main-div {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+}
+.mat-sidenav-container {
+  height: 90%;  // hack a cambiar 
 }
 
 .latlon{
@@ -18,3 +28,7 @@
 /* .mat-form-field{
     width: 100px;
 } */
+
+.custom.mat-card{
+  padding: 4px;
+}

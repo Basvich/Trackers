@@ -15,11 +15,10 @@ import {DlgGetSrvComponent} from './components/dlg-get-srv/dlg-get-srv.component
 import {GstRestSrvService, PlantR} from '../services/gst-rest-srv.service';
 import {Plant} from './plant/plant';
 import {Tsc, Tsm} from './plant/tsm';
-import * as ts from 'typescript';
 import {GstSignalrService, IDataChanged} from '../services/gst-signalr.service';
 import {firstValueFrom} from 'rxjs';
-import {Variable} from '@angular/compiler/src/render3/r3_ast';
 import Delaunator from 'delaunator';
+import {T3Dtsm} from './tracksHelpers/tsmHelper';
 
 
 @Component({
@@ -37,6 +36,7 @@ export class ThreeTestComponent implements OnInit {
   objects: THREE.Object3D[] = [];
   panels: THREE.Object3D[] = [];
   trackers: T3DTracker[] = [];
+  tsms: T3Dtsm[] = [];
   camera: THREE.PerspectiveCamera;
   camControl: OrbitControls
   panel1: THREE.Object3D;
@@ -157,7 +157,7 @@ export class ThreeTestComponent implements OnInit {
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     //Posicion inicial de la camara
     this.camera.position.set(0, -120, 100);
-    this.camera.up.set(0, 1, 0);
+    this.camera.up.set(0, 0, 1);
     this.camera.lookAt(0, 0, 0);
     //const cameraHelper = new THREE.CameraHelper( this.camera );
     //this.scene.add( cameraHelper );
@@ -165,10 +165,14 @@ export class ThreeTestComponent implements OnInit {
     this.camControl = new OrbitControls(this.camera, this.renderer.domElement);
     this.camControl.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
     this.camControl.dampingFactor = 0.05;
-    this.camControl.screenSpacePanning = false;
+    this.camControl.screenSpacePanning = true;
     this.camControl.minDistance = 10;
     this.camControl.maxDistance = 2000;
+    this.camControl.enablePan = true;
+    this.camControl.keyPanSpeed = 7.0;	// pixels moved per arrow key push
+    this.camControl.enableKeys = true;
     //this.camControl.maxPolarAngle = Math.PI / 2;
+
 
     this.scene = new THREE.Scene();
     {
@@ -215,7 +219,7 @@ export class ThreeTestComponent implements OnInit {
     this.scene.add(solarSystem);
     this.objects.push(solarSystem);
 
-    const arrow = new THREE.ArrowHelper(
+    /* const arrow = new THREE.ArrowHelper(
       // first argument is the direction
       new THREE.Vector3(2, 2, 0).normalize(),
       // second argument is the orgin
@@ -223,17 +227,19 @@ export class ThreeTestComponent implements OnInit {
       // length
       5,
       // color
-      0x10ff00, 0.8, 0.6);
-    this.scene.add(arrow);
+      0x10ff00,
+       1, // Head lenght
+       1); // Head width
+    this.scene.add(arrow); */
 
-    //Tierra
+    /* //Tierra
     const earthMaterial = new THREE.MeshStandardMaterial({color: 0x10ff00});
     this.earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
     this.earthMesh.receiveShadow = true;
     this.earthMesh.castShadow = true;
     this.earthMesh.position.set(0, 0, 35);
-    solarSystem.add(this.earthMesh);
-    this.objects.push(this.earthMesh);
+    solarSystem.add(this.earthMesh); */
+    //this.objects.push(this.earthMesh);
 
     this.createFloor3D();
     this.createPanels();
@@ -417,27 +423,27 @@ export class ThreeTestComponent implements OnInit {
       this.scene.add(terrainMesh);
       this.terrainMesh = terrainMesh;
     } else {
-      let points3d:THREE.Vector3[] = [];
-      plant.Tsms.forEach(tsm=>{
-        tsm.TscId.forEach(tsc=>{
+      const points3d: THREE.Vector3[] = [];
+      plant.Tsms.forEach(tsm => {
+        tsm.TscId.forEach(tsc => {
           points3d.push(new THREE.Vector3(tsc.pos.x, tsc.pos.y, tsc.pos.z));
         })
       });
       //Añadimos 4 esquinas
-      const margen=10;
+      const margen = 10;
       /* points3d.push(new THREE.Vector3(plant.box.bottLow.x-margen, plant.box.bottLow.y-margen, 0));
       points3d.push(new THREE.Vector3(plant.box.bottLow.x-margen, plant.box.topHight.y+margen, 0));
       points3d.push(new THREE.Vector3(plant.box.topHight.x+margen, plant.box.topHight.y+margen, 0));
       points3d.push(new THREE.Vector3(plant.box.topHight.x+margen, plant.box.bottLow.y-margen, 0)); */
 
-      let geom = new THREE.BufferGeometry().setFromPoints(points3d);
-      let indexDelaunay = Delaunator.from(
+      const geom = new THREE.BufferGeometry().setFromPoints(points3d);
+      const indexDelaunay = Delaunator.from(
         points3d.map(v => {
           return [v.y, v.x];
         })
       );
-      var meshIndex = []; // delaunay index => three.js index
-      for (let i = 0; i < indexDelaunay.triangles.length; i++){
+      const meshIndex = []; // delaunay index => three.js index
+      for (let i = 0; i < indexDelaunay.triangles.length; i++) {
         meshIndex.push(indexDelaunay.triangles[i]);
       }
       geom.setIndex(meshIndex); // add three.js index to the existing geometry
@@ -517,11 +523,6 @@ export class ThreeTestComponent implements OnInit {
     const nPlant = this.createPlantStructure(p);
     nPlant.Center();
     this.setNewPlant(nPlant);
-    /* this.restApi.GetPlant(plantId).subscribe(p=>{
-      const nPlant=this.createPlantStructure(p);
-      nPlant.Center();
-      this.setNewPlant(nPlant);
-    }); */
   }
 
   private loadAlarms() {
@@ -529,7 +530,7 @@ export class ThreeTestComponent implements OnInit {
       if (alarms == null) return;
       let lastTsm: Tsm = null;
       let lastTsc: Tsc = null;
-      for (let alarm of alarms) {
+      for (const alarm of alarms) {
         if (!lastTsm || lastTsm.Id != alarm.tsmId) {
           lastTsm = this.plant.Tsms.get(alarm.tsmId);
           lastTsc = null;
@@ -550,7 +551,8 @@ export class ThreeTestComponent implements OnInit {
     plant.Id = plantR.id;
     plant.GeoPos.latitude = plantR.geoLocation.y;
     plant.GeoPos.longitude = plantR.geoLocation.x;
-    for (var tsmr of plantR.trackerGroups) {
+    for (const tsmr of plantR.trackerGroups) {
+      let zTsm=0; //Como los tsm no tienen z, la tomo de algun tsc
       const tsm = new Tsm();
       tsm.Id = tsmr.id;
       tsm.name = tsmr.name;
@@ -560,7 +562,7 @@ export class ThreeTestComponent implements OnInit {
         y: tsmr.utmLocation.y,
         z: 0
       };
-      for (var tscR of tsmr.tsCs) {
+      for (const tscR of tsmr.tsCs) {
         const tsc = new Tsc();
         tsc.id = tscR.id;
         tsc.topic = tscR.mqttTopic;
@@ -570,8 +572,10 @@ export class ThreeTestComponent implements OnInit {
           z: tscR.zCoordinate
         };
         if (tsc.pos.z === undefined || tsc.pos.z === null) tsc.pos.z = 0;
+        zTsm=tsc.pos.z;
         tsm.Add(tsc);
       }
+      tsm.pos.z=zTsm;
       plant.AddTsm(tsm);
     }
     return plant;
@@ -585,13 +589,14 @@ export class ThreeTestComponent implements OnInit {
     // Eliminación de la escena anterior
     this.disposeCurrentMeshes();
     this.createTrackersFromPlant(plant);
+    this.createTsmsFromPlant(plant);
     this.CreateFloor3DFromPlant(plant);
     this.plant = plant;
     //Ponemos la posición actual
     this.geoPos.latitude = plant.GeoPos.latitude;
     this.geoPos.longitude = plant.GeoPos.longitude;
     //Fecha y hora actual
-    var utcnow = new Date();
+    const utcnow = new Date();
     this.selectedDate = utcnow;
     console.log(utcnow);
     //Paso la hora a decimal
@@ -618,7 +623,7 @@ export class ThreeTestComponent implements OnInit {
 
   private createTrackersFromPlant(plant: Plant) {
     const large = 20;
-    const offsetZ = 3;
+    const offsetZ = 2;
     plant.Tsms.forEach(tsm => {
       tsm.TscId.forEach(tsc => {
         const x = tsc.pos.x;
@@ -634,6 +639,19 @@ export class ThreeTestComponent implements OnInit {
     });
   }
 
+  private createTsmsFromPlant(plant: Plant) {
+    const offsetZ = 8;
+    plant.Tsms.forEach(tsm => {
+      const x = tsm.pos.x;
+      const y = tsm.pos.y;
+      const z = tsm.pos.z+offsetZ;
+      const nTsm3d = new T3Dtsm(x, y, z);
+      this.tsms.push(nTsm3d);
+      this.scene.add(nTsm3d.Mesh);
+      tsm.Tsm3D = nTsm3d;
+    });
+  }
+
 
   /**Elimina los elementos actuales que existen en la scena      
    * @private
@@ -641,10 +659,14 @@ export class ThreeTestComponent implements OnInit {
    */
   private disposeCurrentMeshes(): void {
     //Los trackers
-    for (var tck of this.trackers) {
+    for (const tck of this.trackers) {
       tck.Delete(this.scene);
     }
     this.trackers.length = 0;
+    for (const tsm of this.tsms) {
+      tsm.Delete(this.scene);
+    }
+    this.tsms.length = 0;
     //El terreno
     this.scene.remove(this.terrainMesh);
     this.terrainMesh.geometry.dispose();
@@ -656,10 +678,6 @@ export class ThreeTestComponent implements OnInit {
       this.processData(d);
     });
     //Enviamos las peticiones para los ultimos valores
-    /* const fTsm: Tsm=this.plant.Tsms.entries().next().value[1];
-    setTimeout(() => {
-      this.gstSignal.GetLastData(this.plant.Id, fTsm.Id);
-    }, 1000);     */
     setTimeout(() => {
       this.plant.Tsms.forEach(tsm => {
         this.gstSignal.GetLastData(this.plant.Id, tsm.Id);
@@ -673,26 +691,27 @@ export class ThreeTestComponent implements OnInit {
    * @memberof ThreeTestComponent
    */
   private processData(d: IDataChanged) {
-    let variables = d.value.v;
+    const variables = d.value.v;
     if (variables == null) return;
     let lastTsm: Tsm = null;
     let lastTsc: Tsc = null;
     variables.forEach(variable => {
-      let tsmTopic = variable.info.tsmId;
+      const tsmTopic = variable.info.tsmId;
       if (lastTsm === null || lastTsm.Topic != tsmTopic) {
         lastTsm = this.plant.TsmsTopic.get(tsmTopic);
         lastTsc = null;
       }
       if (!lastTsm) return;
-      let tscTopic = variable.info.tscId;
-      if (!tscTopic) return;
-      if (lastTsc === null || lastTsc.topic != tscTopic) {
-        lastTsc = lastTsm.TscTopic.get(tscTopic);
+      const tscTopic = variable.info.tscId;
+      if (!tscTopic) {  //Es de un tsm solo
+        lastTsm.setVariableValue(variable.info.variableId, variable.value.v);
+      } else {
+        if (lastTsc === null || lastTsc.topic != tscTopic) {
+          lastTsc = lastTsm.TscTopic.get(tscTopic);
+        }
+        if (lastTsc === null) return;
+        lastTsc.setVariableValue(variable.info.variableId, variable.value.v);
       }
-      if (lastTsc === null) return;
-      lastTsc.setVariableValue(variable.info.variableId, variable.value.v);
     });
-
   }
-
 }

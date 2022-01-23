@@ -1,4 +1,5 @@
 import {T3DTracker} from "../tracksHelpers/trackHelper";
+import {T3Dtsm} from "../tracksHelpers/tsmHelper";
 
 export interface v3D{
     x:number;
@@ -11,6 +12,10 @@ export class Tsm{
   public name:string;
   public Topic:string;
   public pos:v3D;
+
+  /** Referencia al tracker 3D */
+  public Tsm3D: T3Dtsm;
+
   /**
    * Tscs con clave Id
    *
@@ -29,6 +34,23 @@ export class Tsm{
   public Add(tsc: Tsc){
     this.TscId.set(tsc.id, tsc);
     this.TscTopic.set(tsc.topic, tsc);
+  }
+
+  public setVariableValue(varName: string, value:number){
+    switch (varName){
+      case "wind_speed":{        
+        this.Tsm3D.windSpeed=value;
+        break;
+      }
+      case "wind_direction":{
+        this.Tsm3D.windDir=value*Math.PI/180;
+        break;
+      }
+      default:{
+        //console.log(varName);
+        break; 
+      }
+    }
   }
 }
 
@@ -52,6 +74,7 @@ export class Tsc{
     switch(varName){
       case "CommLost":
         this.Tracker.alarmCom=value;
+        break;
       case "FlagSystemOk":
         this.Tracker.flagSystemOk=!value;
     }
