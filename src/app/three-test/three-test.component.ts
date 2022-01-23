@@ -219,7 +219,7 @@ export class ThreeTestComponent implements OnInit {
     this.scene.add(solarSystem);
     this.objects.push(solarSystem);
 
-    const arrow = new THREE.ArrowHelper(
+    /* const arrow = new THREE.ArrowHelper(
       // first argument is the direction
       new THREE.Vector3(2, 2, 0).normalize(),
       // second argument is the orgin
@@ -227,17 +227,19 @@ export class ThreeTestComponent implements OnInit {
       // length
       5,
       // color
-      0x10ff00, 0.8, 0.6);
-    this.scene.add(arrow);
+      0x10ff00,
+       1, // Head lenght
+       1); // Head width
+    this.scene.add(arrow); */
 
-    //Tierra
+    /* //Tierra
     const earthMaterial = new THREE.MeshStandardMaterial({color: 0x10ff00});
     this.earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
     this.earthMesh.receiveShadow = true;
     this.earthMesh.castShadow = true;
     this.earthMesh.position.set(0, 0, 35);
-    solarSystem.add(this.earthMesh);
-    this.objects.push(this.earthMesh);
+    solarSystem.add(this.earthMesh); */
+    //this.objects.push(this.earthMesh);
 
     this.createFloor3D();
     this.createPanels();
@@ -550,6 +552,7 @@ export class ThreeTestComponent implements OnInit {
     plant.GeoPos.latitude = plantR.geoLocation.y;
     plant.GeoPos.longitude = plantR.geoLocation.x;
     for (const tsmr of plantR.trackerGroups) {
+      let zTsm=0; //Como los tsm no tienen z, la tomo de algun tsc
       const tsm = new Tsm();
       tsm.Id = tsmr.id;
       tsm.name = tsmr.name;
@@ -569,8 +572,10 @@ export class ThreeTestComponent implements OnInit {
           z: tscR.zCoordinate
         };
         if (tsc.pos.z === undefined || tsc.pos.z === null) tsc.pos.z = 0;
+        zTsm=tsc.pos.z;
         tsm.Add(tsc);
       }
+      tsm.pos.z=zTsm;
       plant.AddTsm(tsm);
     }
     return plant;
@@ -618,7 +623,7 @@ export class ThreeTestComponent implements OnInit {
 
   private createTrackersFromPlant(plant: Plant) {
     const large = 20;
-    const offsetZ = 3;
+    const offsetZ = 2;
     plant.Tsms.forEach(tsm => {
       tsm.TscId.forEach(tsc => {
         const x = tsc.pos.x;
@@ -639,8 +644,8 @@ export class ThreeTestComponent implements OnInit {
     plant.Tsms.forEach(tsm => {
       const x = tsm.pos.x;
       const y = tsm.pos.y;
-      const z = tsm.pos.z;
-      const nTsm3d = new T3Dtsm(x, y, offsetZ);
+      const z = tsm.pos.z+offsetZ;
+      const nTsm3d = new T3Dtsm(x, y, z);
       this.tsms.push(nTsm3d);
       this.scene.add(nTsm3d.Mesh);
       tsm.Tsm3D = nTsm3d;

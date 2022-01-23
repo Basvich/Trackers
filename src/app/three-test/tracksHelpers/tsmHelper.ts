@@ -3,7 +3,7 @@ import * as THREE from "three";
 
 
 const sphereGeometry = new THREE.SphereGeometry(2, 6, 6);
-const earthMaterial = new THREE.MeshStandardMaterial({color: 0x10ff00});
+const earthMaterial = new THREE.MeshStandardMaterial({color: 0xff33ff});
 
 export class T3Dtsm{
     
@@ -50,6 +50,7 @@ export class T3Dtsm{
         5,
         // color
         0x10ff00, 0.8, 0.6);
+       
        this.mesh.add(this.arrow) ;
       //this.scene.add(arrow);
     }
